@@ -9,6 +9,9 @@ export interface User {
   avatarUrl?: string;
   authProvider?: 'LOCAL' | 'GOOGLE';
   role?: 'ROLE_USER' | 'ROLE_ADMIN';
+  enabled?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface LoginRequest {
@@ -20,12 +23,17 @@ export interface RegisterRequest {
   username: string;
   email: string;
   password?: string;
+  avatarUrl?: string;
 }
 
 export interface AuthResponse {
   token: string;
+  id?: number;
   username: string;
   email: string;
+  avatarUrl?: string;
+  role?: string;
+  authProvider?: string;
 }
 
 export interface AuthState {

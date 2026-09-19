@@ -41,8 +41,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const handleAuthSuccess = (data: AuthResponse) => {
     const userData: User = {
+      id: data.id,
       username: data.username,
       email: data.email,
+      avatarUrl: data.avatarUrl || `https://ui-avatars.com/api/?name=${data.username}&background=094cb2&color=fff`,
+      role: (data.role as any) || 'ROLE_USER',
+      authProvider: (data.authProvider as any) || 'LOCAL',
     };
     setToken(data.token);
     setUser(userData);
