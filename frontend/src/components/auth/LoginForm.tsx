@@ -24,7 +24,7 @@ export const LoginForm: React.FC = () => {
 
     try {
       await login({ email, password });
-      navigate(ROUTES.HOME);
+      navigate(ROUTES.DASHBOARD);
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Error al iniciar sesión. Verifique sus credenciales.';
       setErrorMessage(msg);

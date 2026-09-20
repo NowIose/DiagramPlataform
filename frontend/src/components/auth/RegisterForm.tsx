@@ -36,7 +36,7 @@ export const RegisterForm: React.FC = () => {
 
     try {
       await register({ username, email, password });
-      navigate(ROUTES.HOME);
+      navigate(ROUTES.DASHBOARD);
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Error al registrar el usuario. El correo o usuario pueden estar en uso.';
       setErrorMessage(msg);
