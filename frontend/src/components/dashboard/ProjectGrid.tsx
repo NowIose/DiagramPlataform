@@ -1,81 +1,57 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProjectCard, { type ProjectCardProps } from './ProjectCard';
-
-const MOCK_PROJECTS: (ProjectCardProps & { category: string })[] = [
-  {
-    id: "1",
-    title: "E-Commerce Core & Checkout",
-    subtitle: "UML Clases + Relacional (PostgreSQL 16)",
-    icon: "shopping_bag",
-    tagText: "En vivo",
-    tagClass: "bg-tertiary-container/30 text-on-tertiary-fixed-variant",
-    entitiesTitle: "Entidades Principales:",
-    entities: ["Order", "Payment", "InventoryItem", "Customer", "+12 más"],
-    metaTags: [
-      { icon: "layers", text: "16 Entidades" },
-      { icon: "bolt", text: "Spring Boot 3.3" },
-      { icon: "sync", text: "Flyway v1.4" }
-    ],
-    collaborators: [
-      { init: "SO", color: "bg-primary text-on-primary" },
-      { init: "CA", color: "bg-primary-container text-on-primary-container" },
-      { init: "DA", color: "bg-tertiary-container text-on-tertiary-container" }
-    ],
-    category: "uml erd",
-    onToast: () => {}
-  },
-  {
-    id: "2",
-    title: "Fintech Payments & Ledger",
-    subtitle: "Modelo Relacional DDD (Multi-Tenant)",
-    icon: "account_balance",
-    tagText: "ACID Estricto",
-    tagClass: "bg-surface-container text-secondary",
-    entitiesTitle: "Características Clave:",
-    entities: ["Particionado de transacciones", "Ledger inmutable"],
-    metaTags: [
-      { icon: "table_chart", text: "24 Tablas ACID" },
-      { icon: "integration_instructions", text: "Spring Data JPA" },
-      { icon: "dock", text: "Docker Compose" }
-    ],
-    collaborators: [
-      { init: "CA", color: "bg-primary text-on-primary" },
-      { init: "EL", color: "bg-secondary text-on-secondary" }
-    ],
-    category: "erd microservices",
-    onToast: () => {}
-  },
-  // We can add the rest, let's keep it concise or add 2 more
-  {
-    id: "3",
-    title: "Auth & Identity Service",
-    subtitle: "Microservicio OAuth2 & Keycloak",
-    icon: "verified_user",
-    tagText: "Producción",
-    tagClass: "bg-primary-fixed text-on-primary-fixed",
-    entitiesTitle: "Entidades Principales:",
-    entities: ["UserAccount", "RolePermission", "RefreshToken"],
-    metaTags: [
-      { icon: "class", text: "8 Clases Core" },
-      { icon: "key", text: "Tokens JWT RSA" },
-      { icon: "memory", text: "Redis Cache" }
-    ],
-    collaborators: [
-      { init: "SO", color: "bg-primary text-on-primary" }
-    ],
-    category: "uml microservices",
-    onToast: () => {}
-  }
-];
+import { ProjectService } from '../../services/project.service';
+import type { Project } from '../../types/project.types';
+import CreateProjectModal from './CreateProjectModal';
 
 export default function ProjectGrid({ onToast }: { onToast: (t: string, m: string, i: string) => void }) {
   const [filter, setFilter] = useState('all');
   const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const filteredProjects = MOCK_PROJECTS.filter(p => filter === 'all' || p.category.includes(filter));
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const loadProjects = async () => {
+    try {
+      const data = await ProjectService.getProjects();
+      setProjects(data);
+    } catch (error) {
+      console.error("Error loading projects:", error);
+      onToast("Error", "No se pudieron cargar los proyectos", "error");
+    }
+  };
+
+  const handleProjectCreated = () => {
+    setIsModalOpen(false);
+    loadProjects();
+  };
+
+  const mappedProjects: (ProjectCardProps & { category: string })[] = projects.map(p => ({
+    id: p.id.toString(),
+    title: p.name,
+    subtitle: p.description || "Sin descripción",
+    icon: "account_tree",
+    tagText: "Nuevo",
+    tagClass: "bg-surface-container text-secondary",
+    entitiesTitle: "Fecha de actualización:",
+    entities: [new Date(p.updatedAt).toLocaleDateString()],
+    metaTags: [
+      { icon: "person", text: p.ownerUsername }
+    ],
+    collaborators: [
+      { init: p.ownerUsername.substring(0, 2).toUpperCase(), color: "bg-primary text-on-primary" }
+    ],
+    category: "uml erd",
+    onToast: onToast
+  }));
+
+  const filteredProjects = mappedProjects.filter(p => filter === 'all' || p.category.includes(filter));
 
   return (
-    <section className="xl:col-span-8 flex flex-col">
+    <section className="flex flex-col">
       <div className="bg-surface-container-lowest p-3 rounded-2xl shadow-sm mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
           <button onClick={() => setFilter('all')} className={`px-3.5 py-1.5 rounded-xl text-xs font-label font-semibold transition-all shrink-0 ${filter === 'all' ? 'bg-primary text-on-primary' : 'text-on-surface-variant hover:bg-surface-container-high'}`}>Todos los Proyectos</button>
@@ -108,7 +84,11 @@ export default function ProjectGrid({ onToast }: { onToast: (t: string, m: strin
           <ProjectCard key={project.id} {...project} onToast={onToast} />
         ))}
         
-        <button className="bg-surface-container-low/60 hover:bg-surface-container-low rounded-2xl p-6 transition-all flex flex-col items-center justify-center text-center group cursor-pointer min-h-[260px] shadow-sm hover:shadow" onClick={() => onToast('Nuevo Lienzo', 'Selecciona el arquetipo de base de datos para comenzar.', 'note_add')} type="button">
+        <button 
+          className="bg-surface-container-low/60 hover:bg-surface-container-low rounded-2xl p-6 transition-all flex flex-col items-center justify-center text-center group cursor-pointer min-h-[260px] shadow-sm hover:shadow" 
+          onClick={() => setIsModalOpen(true)} 
+          type="button"
+        >
           <div className="w-14 h-14 rounded-2xl bg-surface-container-lowest flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-sm mb-3">
             <span className="material-symbols-outlined text-[28px]">add</span>
           </div>
@@ -121,6 +101,13 @@ export default function ProjectGrid({ onToast }: { onToast: (t: string, m: strin
           </span>
         </button>
       </div>
+
+      <CreateProjectModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleProjectCreated}
+        onToast={onToast}
+      />
     </section>
   );
 }

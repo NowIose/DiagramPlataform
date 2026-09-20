@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+
 export interface ProjectCardProps {
   id: string;
   title: string;
@@ -13,8 +15,10 @@ export interface ProjectCardProps {
 }
 
 export default function ProjectCard({
-  title, subtitle, icon, tagText, tagClass, entitiesTitle, entities, metaTags, collaborators, onToast
+  id, title, subtitle, icon, tagText, tagClass, entitiesTitle, entities, metaTags, collaborators, onToast
 }: ProjectCardProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="project-card bg-surface-container-lowest rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group relative overflow-hidden">
       {tagText.includes('En vivo') && (
@@ -65,14 +69,14 @@ export default function ProjectCard({
         </div>
         <div className="flex items-center gap-2">
           <button 
-            className="px-3 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-dim text-primary text-xs font-label font-semibold flex items-center gap-1 transition-colors" 
+            className="px-3 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-dim text-primary text-xs font-label font-semibold flex items-center gap-1 transition-colors cursor-pointer" 
             type="button"
-            onClick={() => onToast('Cargando Lienzo', 'Abriendo el diseñador visual para ' + title, 'draw')}
+            onClick={() => navigate(`/dashboard/projects/${id}/editor`)}
           >
             <span className="material-symbols-outlined text-[14px]">draw</span> Abrir Lienzo
           </button>
           <button 
-            className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-xs font-label font-semibold flex items-center gap-1 shadow-xs transition-colors" 
+            className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-xs font-label font-semibold flex items-center gap-1 shadow-xs transition-colors cursor-pointer" 
             type="button"
             onClick={() => onToast('Generador Spring Boot', 'Sintetizando código Java 21 y Maven pom.xml para ' + title, 'terminal')}
           >

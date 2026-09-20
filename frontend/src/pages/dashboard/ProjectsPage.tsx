@@ -1,13 +1,49 @@
+import { useState } from 'react';
+import ProjectGrid from '../../components/dashboard/ProjectGrid';
+import ToastNotification from '../../components/dashboard/ToastNotification';
+
 export default function ProjectsPage() {
+  const [toast, setToast] = useState({
+    isVisible: false,
+    title: '',
+    message: '',
+    icon: ''
+  });
+
+  const showToast = (title: string, message: string, icon: string = 'info') => {
+    setToast({ isVisible: true, title, message, icon });
+    setTimeout(() => {
+      hideToast();
+    }, 4000);
+  };
+
+  const hideToast = () => {
+    setToast(prev => ({ ...prev, isVisible: false }));
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center h-[70vh] bg-surface-container-lowest rounded-2xl shadow-sm border border-surface-container-low p-8 text-center">
-      <div className="w-20 h-20 bg-primary-container text-on-primary-container rounded-3xl flex items-center justify-center mb-6 shadow-sm">
-        <span className="material-symbols-outlined text-[40px]">account_tree</span>
+    <div className="w-full">
+      <div className="mb-6">
+        <h2 className="text-2xl font-headline font-bold text-on-surface">Proyectos & Diagramas</h2>
+        <p className="text-on-surface-variant font-body text-sm mt-1">
+          Crea y administra tus espacios de modelado UML y Base de Datos.
+        </p>
       </div>
-      <h2 className="text-2xl font-headline font-bold text-on-surface mb-2">Lienzo de Proyectos y Diagramas</h2>
-      <p className="text-on-surface-variant font-body max-w-md">
-        Aquí instalaremos e implementaremos el diseñador interactivo (React Flow) para arrastrar y soltar entidades, configurar sus relaciones y propiedades.
-      </p>
+      
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 w-full">
+        {/* We make ProjectGrid take the full width here by overriding col-span in ProjectGrid or wrapping it */}
+        <div className="xl:col-span-12">
+           <ProjectGrid onToast={showToast} />
+        </div>
+      </div>
+
+      <ToastNotification 
+        isVisible={toast.isVisible}
+        title={toast.title}
+        message={toast.message}
+        icon={toast.icon}
+        onClose={hideToast}
+      />
     </div>
   );
 }

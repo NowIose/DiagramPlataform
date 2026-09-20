@@ -9,6 +9,7 @@ import { PublicRoute } from '../components/auth/PublicRoute';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import DashboardPage from '../pages/DashboardPage';
 import ProjectsPage from '../pages/dashboard/ProjectsPage';
+import CanvasEditorPage from '../pages/dashboard/CanvasEditorPage';
 import EntitiesPage from '../pages/dashboard/EntitiesPage';
 import GeneratorPage from '../pages/dashboard/GeneratorPage';
 import TemplatesPage from '../pages/dashboard/TemplatesPage';
@@ -37,8 +38,10 @@ export const AppRoutes: React.FC = () => {
           <Route path="settings" element={<SettingsPage />} />
           <Route path="docs" element={<DocsPage />} />
         </Route>
+        
+        {/* Editor a pantalla completa, fuera del DashboardLayout */}
+        <Route path={`${ROUTES.DASHBOARD}/projects/:id/editor`} element={<CanvasEditorPage />} />
       </Route>
-
       <Route path="*" element={<LandingPage />} />
     </Routes>
   );

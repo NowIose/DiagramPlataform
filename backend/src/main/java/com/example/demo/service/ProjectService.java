@@ -114,6 +114,54 @@ public class ProjectService {
         collaboratorRepository.delete(collab);
     }
 
+    public ProjectResponse getProjectById(Long projectId, String username) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isOwner = project.getOwner().getId().equals(user.getId());
+        boolean isCollaborator = collaboratorRepository.findByProjectIdAndUserId(projectId, user.getId()).isPresent();
+
+        if (!isOwner && !isCollaborator) {
+            throw new RuntimeException("You do not have access to this project");
+        }
+
+        return mapToResponse(project);
+    }
+
+    public ProjectResponse updateDiagram(Long projectId, String diagramData, String username) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isOwner = project.getOwner().getId().equals(user.getId());
+        Optional<ProjectCollaborator> collab = collaboratorRepository.findByProjectIdAndUserId(projectId, user.getId());
+        boolean isEditor = collab.isPresent() && (collab.get().getRole() == ProjectRole.EDITOR || collab.get().getRole() == ProjectRole.OWNER);
+
+        if (!isOwner && !isEditor) {
+            throw new RuntimeException("You do not have edit access to this project");
+        }
+
+        project.setDiagramData(diagramData);
+        Project savedProject = projectRepository.save(project);
+        return mapToResponse(savedProject);
+    }
+
+    public void deleteProject(Long projectId, String username) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        if (!project.getOwner().getUsername().equals(username)) {
+            throw new RuntimeException("Only the owner can delete the project");
+        }
+
+        projectRepository.delete(project);
+    }
+
     private ProjectResponse mapToResponse(Project project) {
         ProjectResponse response = new ProjectResponse();
         response.setId(project.getId());
@@ -123,6 +171,7 @@ public class ProjectService {
         response.setOwnerUsername(project.getOwner().getUsername());
         response.setCreatedAt(project.getCreatedAt());
         response.setUpdatedAt(project.getUpdatedAt());
+        response.setDiagramData(project.getDiagramData());
         return response;
     }
 }

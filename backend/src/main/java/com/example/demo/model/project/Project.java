@@ -17,6 +17,9 @@ public class Project {
 
     private String description;
 
+    @Column(name = "diagram_data", columnDefinition = "TEXT")
+    private String diagramData;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
@@ -48,6 +51,9 @@ public class Project {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public String getDiagramData() { return diagramData; }
+    public void setDiagramData(String diagramData) { this.diagramData = diagramData; }
 
     public User getOwner() { return owner; }
     public void setOwner(User owner) { this.owner = owner; }

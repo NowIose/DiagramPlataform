@@ -10,6 +10,7 @@ public class ProjectResponse {
     private String ownerUsername;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String diagramData;
     
     // Getters and Setters
     public Long getId() { return id; }
@@ -32,4 +33,7 @@ public class ProjectResponse {
     
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    public String getDiagramData() { return diagramData; }
+    public void setDiagramData(String diagramData) { this.diagramData = diagramData; }
 }
