@@ -1,24 +1,40 @@
 import { useState } from 'react';
-import { useOnSelectionChange, type Node } from '@xyflow/react';
+import { useOnSelectionChange } from '@xyflow/react';
+import type { Node, Edge } from '@xyflow/react';
 
 interface PropertiesPanelProps {
   nodes: Node[];
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
+  edges: Edge[];
+  setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
 }
 
-export default function PropertiesPanel({ nodes, setNodes }: PropertiesPanelProps) {
+export default function PropertiesPanel({ nodes, setNodes, edges, setEdges }: PropertiesPanelProps) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  
-  // Escuchar cuando el usuario selecciona un nodo
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
+
   useOnSelectionChange({
-    onChange: ({ nodes: selectedNodes }) => {
-      setSelectedNodeId(selectedNodes.length === 1 ? selectedNodes[0].id : null);
+    onChange: ({ nodes, edges }) => {
+      setSelectedNodeId(nodes.length === 1 ? nodes[0].id : null);
+      setSelectedEdgeId(edges.length === 1 ? edges[0].id : null);
     },
   });
 
   const selectedNode = selectedNodeId ? nodes.find(n => n.id === selectedNodeId) : null;
+  const selectedEdge = selectedEdgeId ? edges.find(e => e.id === selectedEdgeId) : null;
 
-  if (!selectedNode) {
+  const updateEdgeData = (key: string, value: any) => {
+    setEdges((eds) => 
+      eds.map((edge) => {
+        if (edge.id === selectedEdge?.id) {
+          return { ...edge, data: { ...edge.data, [key]: value } };
+        }
+        return edge;
+      })
+    );
+  };
+
+  if (!selectedNode && !selectedEdge) {
     return (
       <div className="w-64 shrink-0 bg-surface border-l border-surface-container-low flex flex-col z-10 shadow-sm hidden lg:flex h-full">
         <div className="p-3 border-b border-surface-container-lowest">
@@ -32,7 +48,77 @@ export default function PropertiesPanel({ nodes, setNodes }: PropertiesPanelProp
     );
   }
 
-  const { id, type, data } = selectedNode;
+  if (selectedEdge) {
+    return (
+      <div className="w-64 shrink-0 bg-surface border-l border-surface-container-low flex flex-col z-10 shadow-sm hidden lg:flex h-full overflow-y-auto">
+        <div className="p-3 border-b border-surface-container-lowest sticky top-0 bg-surface z-10">
+          <h4 className="text-xs font-label font-bold text-on-surface">Relación</h4>
+        </div>
+        <div className="p-4 flex flex-col gap-4">
+          <div>
+            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 block">Tipo de Relación</label>
+            <select 
+              value={(selectedEdge.data?.relationType as string) || 'umlAssociation'} 
+              onChange={(e) => updateEdgeData('relationType', e.target.value)}
+              className="w-full bg-surface-container-lowest text-xs text-on-surface p-2 rounded border border-surface-container-highest outline-none focus:border-primary transition-colors"
+            >
+              <option value="umlAssociation">Asociación</option>
+              <option value="umlGeneralization">Herencia</option>
+              <option value="umlRealization">Implementación</option>
+              <option value="umlAggregation">Agregación</option>
+              <option value="umlComposition">Composición</option>
+              <option value="umlAssociationClass">Clase Intermedia</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 block">Cardinalidad Origen</label>
+            <select 
+              value={(selectedEdge.data?.sourceMultiplicity as string) || ''} 
+              onChange={(e) => updateEdgeData('sourceMultiplicity', e.target.value)}
+              className="w-full bg-surface-container-lowest text-xs text-on-surface p-2 rounded border border-surface-container-highest outline-none focus:border-primary transition-colors"
+            >
+              <option value="">(Ninguna)</option>
+              <option value="1">1 (Uno)</option>
+              <option value="0..1">0..1 (Cero o uno)</option>
+              <option value="*">* (Muchos)</option>
+              <option value="0..*">0..* (Cero a muchos)</option>
+              <option value="1..*">1..* (Uno a muchos)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 block">Cardinalidad Destino</label>
+            <select 
+              value={(selectedEdge.data?.targetMultiplicity as string) || ''} 
+              onChange={(e) => updateEdgeData('targetMultiplicity', e.target.value)}
+              className="w-full bg-surface-container-lowest text-xs text-on-surface p-2 rounded border border-surface-container-highest outline-none focus:border-primary transition-colors"
+            >
+              <option value="">(Ninguna)</option>
+              <option value="1">1 (Uno)</option>
+              <option value="0..1">0..1 (Cero o uno)</option>
+              <option value="*">* (Muchos)</option>
+              <option value="0..*">0..* (Cero a muchos)</option>
+              <option value="1..*">1..* (Uno a muchos)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 block">Nombre / Rol</label>
+            <input 
+              type="text" 
+              value={(selectedEdge.data?.roleName as string) || ''} 
+              onChange={(e) => updateEdgeData('roleName', e.target.value)}
+              placeholder="ej: tiene, administra"
+              className="w-full bg-surface-container-lowest text-xs text-on-surface p-2 rounded border border-surface-container-highest outline-none focus:border-primary transition-colors"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const { id, type, data } = selectedNode!;
 
   const updateData = (newData: Record<string, any>) => {
     setNodes((nds) => 
@@ -44,6 +130,29 @@ export default function PropertiesPanel({ nodes, setNodes }: PropertiesPanelProp
       })
     );
   };
+
+  if (type === 'umlNote' || type === 'umlComment') {
+    return (
+      <div className="w-64 shrink-0 bg-surface border-l border-surface-container-low flex flex-col z-10 shadow-sm hidden lg:flex h-full overflow-y-auto">
+        <div className="p-3 border-b border-surface-container-lowest sticky top-0 bg-surface z-10 flex items-center justify-between">
+          <h4 className="text-xs font-label font-bold text-on-surface">Propiedades</h4>
+          <span className="text-[10px] font-mono bg-surface-container-highest text-on-surface-variant px-1 rounded">{type}</span>
+        </div>
+        
+        <div className="p-4 flex flex-col gap-4">
+          <div>
+            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 block">Contenido</label>
+            <textarea 
+              value={(data.text as string) || ''} 
+              onChange={(e) => updateData({ text: e.target.value })}
+              className="w-full min-h-[150px] bg-surface-container-lowest text-xs text-on-surface p-2 rounded border border-surface-container-highest outline-none focus:border-primary transition-colors resize-y"
+              placeholder="Escribe tu nota aquí..."
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const updateListItem = (listName: 'attributes' | 'methods', index: number, field: string, value: string) => {
     const list = Array.isArray(data[listName]) ? [...data[listName]] : [];

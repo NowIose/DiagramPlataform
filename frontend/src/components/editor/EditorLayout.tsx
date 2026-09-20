@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ToolboxPanel from './panels/ToolboxPanel';
 
 interface EditorLayoutProps {
   projectId: string;
@@ -48,9 +47,7 @@ export default function EditorLayout({ projectId, children, onSave, isSaving }: 
 
       {/* Contenedor central */}
       <div className="flex-1 flex overflow-hidden relative">
-        <ToolboxPanel />
-
-        {/* Lienzo central (React Flow) */}
+        {/* Lienzo central (React Flow y sus paneles) */}
         <div className="flex-1 bg-surface-container-lowest relative">
           {children}
         </div>

@@ -14,16 +14,21 @@ export default function UmlClassNode({ data, selected, type }: any) {
 
   if (type === 'umlInterface') stereotype = '<<interface>>';
   if (type === 'umlEnum') stereotype = '<<enumeration>>';
+  if (type === 'umlIntermediateClass') stereotype = '<<intermediate>>';
+
+  const borderStyle = type === 'umlIntermediateClass' ? 'border-dashed border-tertiary/70' : 'border-solid';
 
   return (
-    <div className={`border-2 rounded-md shadow-sm w-48 font-mono text-xs overflow-hidden transition-colors ${bgColor} ${selected ? (type==='umlInterface'?'border-tertiary': type==='umlEnum'?'border-secondary':'border-primary') : 'border-surface-container-highest'}`}>
+    <div className={`relative border-2 rounded-md shadow-sm w-48 font-mono text-xs transition-colors ${bgColor} ${borderStyle} ${selected ? (type==='umlInterface'?'border-tertiary': type==='umlEnum'?'border-secondary':'border-primary') : 'border-surface-container-highest'}`}>
       
       {/* Handles para conectar flechas */}
-      <Handle type="target" position={Position.Top} className={`w-2 h-2 border-none ${type==='umlInterface'?'bg-tertiary': type==='umlEnum'?'bg-secondary':'bg-primary'}`} />
-      <Handle type="source" position={Position.Bottom} className={`w-2 h-2 border-none ${type==='umlInterface'?'bg-tertiary': type==='umlEnum'?'bg-secondary':'bg-primary'}`} />
+      <Handle type="source" position={Position.Top} id="top" className={`!w-1.5 !h-1.5 border border-surface-container-lowest z-50 ${type==='umlInterface'?'!bg-tertiary': type==='umlEnum'?'!bg-secondary':'!bg-primary'}`} />
+      <Handle type="source" position={Position.Bottom} id="bottom" className={`!w-1.5 !h-1.5 border border-surface-container-lowest z-50 ${type==='umlInterface'?'!bg-tertiary': type==='umlEnum'?'!bg-secondary':'!bg-primary'}`} />
+      <Handle type="source" position={Position.Left} id="left" className={`!w-1.5 !h-1.5 border border-surface-container-lowest z-50 ${type==='umlInterface'?'!bg-tertiary': type==='umlEnum'?'!bg-secondary':'!bg-primary'}`} />
+      <Handle type="source" position={Position.Right} id="right" className={`!w-1.5 !h-1.5 border border-surface-container-lowest z-50 ${type==='umlInterface'?'!bg-tertiary': type==='umlEnum'?'!bg-secondary':'!bg-primary'}`} />
 
       {/* Header (Nombre de la Clase) */}
-      <div className={`p-2 text-center border-b border-surface-container-highest flex flex-col ${headerColor}`}>
+      <div className={`p-2 text-center border-b border-surface-container-highest flex flex-col rounded-t-sm ${headerColor}`}>
         {stereotype && <span className="text-[10px] font-normal opacity-80">{stereotype}</span>}
         <span className="font-bold">{data.label || 'NewNode'}</span>
       </div>
