@@ -8,6 +8,7 @@ import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import { PublicRoute } from '../components/auth/PublicRoute';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import DashboardPage from '../pages/DashboardPage';
+import ProjectsPage from '../pages/dashboard/ProjectsPage';
 import EntitiesPage from '../pages/dashboard/EntitiesPage';
 import GeneratorPage from '../pages/dashboard/GeneratorPage';
 import TemplatesPage from '../pages/dashboard/TemplatesPage';
@@ -28,6 +29,7 @@ export const AppRoutes: React.FC = () => {
       <Route element={<ProtectedRoute />}>
         <Route path={ROUTES.DASHBOARD} element={<DashboardLayout />}>
           <Route index element={<DashboardPage />} />
+          <Route path="projects" element={<ProjectsPage />} />
           <Route path="entities" element={<EntitiesPage />} />
           <Route path="generator" element={<GeneratorPage />} />
           <Route path="templates" element={<TemplatesPage />} />

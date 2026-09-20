@@ -42,6 +42,10 @@ export default function Sidebar() {
 
       <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
         <NavLink to={ROUTES.DASHBOARD} end className={navLinkClass}>
+          <span className="material-symbols-outlined text-[20px]">space_dashboard</span>
+          <span>Panel General (Métricas)</span>
+        </NavLink>
+        <NavLink to={`${ROUTES.DASHBOARD}/projects`} className={navLinkClass}>
           <span className="material-symbols-outlined text-[20px]">account_tree</span>
           <span>Proyectos & Diagramas</span>
         </NavLink>
