@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -8,10 +8,10 @@ import {
   useEdgesState,
   addEdge,
   useReactFlow,
-  ReactFlowProvider,
   ConnectionMode
 } from '@xyflow/react';
 import type { Connection, Edge, Node } from '@xyflow/react';
+import axios from 'axios';
 import '@xyflow/react/dist/style.css';
 import UmlClassNode from './nodes/UmlClassNode';
 import UmlNoteNode from './nodes/UmlNoteNode';
@@ -73,13 +73,57 @@ const getId = () => `node_${idCounter++}`;
 let edgeCounter = 1;
 const getEdgeId = () => `edge_${edgeCounter++}`;
 
-function CanvasFlow() {
+interface CanvasProps {
+  projectId?: string;
+}
+
+export default function Canvas({ projectId }: CanvasProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { screenToFlowPosition, getNode } = useReactFlow();
   
   // Estado para saber qué línea dibujar
   const [selectedEdgeType, setSelectedEdgeType] = useState('umlAssociation');
+
+  // Cargar datos reales de la base de datos
+  useEffect(() => {
+    if (!projectId) return;
+
+    const fetchProjectData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get(`http://localhost:8080/api/projects/${projectId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.data.diagramData) {
+          const parsedData = JSON.parse(res.data.diagramData);
+          if (parsedData.nodes) setNodes(parsedData.nodes);
+          if (parsedData.edges) setEdges(parsedData.edges);
+          
+          // Actualizar idCounter y edgeCounter para que los nuevos IDs no choquen con los existentes
+          if (parsedData.nodes?.length > 0) {
+            const maxNodeId = Math.max(...parsedData.nodes.map((n: any) => {
+              const num = parseInt(n.id.replace('node_', ''));
+              return isNaN(num) ? 0 : num;
+            }));
+            idCounter = maxNodeId + 1;
+          }
+          if (parsedData.edges?.length > 0) {
+            const maxEdgeId = Math.max(...parsedData.edges.map((e: any) => {
+              const num = parseInt(e.id.replace('edge_', ''));
+              return isNaN(num) ? 0 : num;
+            }));
+            edgeCounter = maxEdgeId + 1;
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching diagram data', error);
+      }
+    };
+
+    fetchProjectData();
+  }, [projectId, setNodes, setEdges]);
 
   const onConnect = useCallback(
     (params: Connection | Edge) => {
@@ -210,13 +254,5 @@ function CanvasFlow() {
       
       <PropertiesPanel nodes={nodes} setNodes={setNodes} edges={edges} setEdges={setEdges} />
     </div>
-  );
-}
-
-export default function Canvas() {
-  return (
-    <ReactFlowProvider>
-      <CanvasFlow />
-    </ReactFlowProvider>
   );
 }
