@@ -81,8 +81,8 @@ public class ProjectService {
             throw new RuntimeException("Only the owner can add collaborators");
         }
 
-        User collaboratorUser = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Collaborator not found with email: " + request.getEmail()));
+        User collaboratorUser = userRepository.findByEmailOrUsername(request.getEmail(), request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Collaborator not found with email or username: " + request.getEmail()));
 
         Optional<ProjectCollaborator> existing = collaboratorRepository.findByProjectIdAndUserId(projectId, collaboratorUser.getId());
         if (existing.isPresent()) {
@@ -162,6 +162,34 @@ public class ProjectService {
         projectRepository.delete(project);
     }
 
+    public ProjectResponse generateShareLink(Long projectId, String username, boolean isPublic) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        if (!project.getOwner().getUsername().equals(username)) {
+            throw new RuntimeException("Only the owner can modify sharing settings");
+        }
+
+        if (isPublic && project.getShareToken() == null) {
+            project.setShareToken(java.util.UUID.randomUUID().toString());
+        }
+        project.setPublic(isPublic);
+        
+        Project savedProject = projectRepository.save(project);
+        return mapToResponse(savedProject);
+    }
+
+    public ProjectResponse getProjectByShareToken(String token) {
+        Project project = projectRepository.findByShareToken(token)
+                .orElseThrow(() -> new RuntimeException("Project not found or invalid token"));
+
+        if (!project.isPublic()) {
+            throw new RuntimeException("This project is no longer public");
+        }
+
+        return mapToResponse(project);
+    }
+
     private ProjectResponse mapToResponse(Project project) {
         ProjectResponse response = new ProjectResponse();
         response.setId(project.getId());
@@ -172,6 +200,8 @@ public class ProjectService {
         response.setCreatedAt(project.getCreatedAt());
         response.setUpdatedAt(project.getUpdatedAt());
         response.setDiagramData(project.getDiagramData());
+        response.setShareToken(project.getShareToken());
+        response.setPublic(project.isPublic());
         return response;
     }
 }

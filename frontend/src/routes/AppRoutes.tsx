@@ -16,6 +16,7 @@ import TemplatesPage from '../pages/dashboard/TemplatesPage';
 import CollaboratorsPage from '../pages/dashboard/CollaboratorsPage';
 import SettingsPage from '../pages/dashboard/SettingsPage';
 import DocsPage from '../pages/dashboard/DocsPage';
+import SharedCanvasPage from '../pages/dashboard/SharedCanvasPage';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -39,9 +40,12 @@ export const AppRoutes: React.FC = () => {
           <Route path="docs" element={<DocsPage />} />
         </Route>
         
-        {/* Editor a pantalla completa, fuera del DashboardLayout */}
         <Route path={`${ROUTES.DASHBOARD}/projects/:id/editor`} element={<CanvasEditorPage />} />
       </Route>
+      
+      {/* Ruta pública para ver diagramas compartidos */}
+      <Route path="/shared/:token" element={<SharedCanvasPage />} />
+
       <Route path="*" element={<LandingPage />} />
     </Routes>
   );

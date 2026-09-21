@@ -88,7 +88,7 @@ Despliegue en AWS: Aprovisionamiento en infraestructura cloud con inyección seg
   (Modulo IA ASISTANT)
     -(IA GENERAL para los diagrams)
   
-       [ESTA IA DEPENDIENDO DE CUAL SEA MAS FACIL SERA LOCAL O USANDO UNA LLAVE DE API KEY DEPENDIENDO DE QUE TAN DIFICIL SEA LIDIAR CON ESO AL DESPLEGAR]
+      [ESTA IA DEPENDIENDO DE CUAL SEA MAS FACIL SERA LOCAL O USANDO UNA LLAVE DE API KEY DEPENDIENDO DE QUE TAN DIFICIL SEA LIDIAR CON ESO AL DESPLEGAR]
       *IA que ayudara como un asistente para ayudar a construir los diagramas por voz o texto
       *La IA podra sugerir cambios o sugerir estructuras mas convenientes
       *La IA no debe generar el diagrama solo nunca a partir de un enunciado tiene que guiar pero no hacer todo el trabajo

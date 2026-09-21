@@ -66,4 +66,16 @@ public class ProjectController {
         projectService.deleteProject(id, user.getUsername());
         return ResponseEntity.ok("Project deleted successfully");
     }
+
+    @PostMapping("/{id}/share")
+    public ResponseEntity<ProjectResponse> updateShareSettings(@PathVariable Long id, @RequestBody java.util.Map<String, Boolean> body, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        boolean isPublic = body.getOrDefault("isPublic", false);
+        return ResponseEntity.ok(projectService.generateShareLink(id, user.getUsername(), isPublic));
+    }
+
+    @GetMapping("/shared/{token}")
+    public ResponseEntity<ProjectResponse> getSharedProject(@PathVariable String token) {
+        return ResponseEntity.ok(projectService.getProjectByShareToken(token));
+    }
 }

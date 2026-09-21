@@ -20,6 +20,12 @@ public class Project {
     @Column(name = "diagram_data", columnDefinition = "TEXT")
     private String diagramData;
 
+    @Column(name = "share_token", unique = true)
+    private String shareToken;
+
+    @Column(name = "is_public", columnDefinition = "boolean default false")
+    private boolean isPublic = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
@@ -54,6 +60,12 @@ public class Project {
 
     public String getDiagramData() { return diagramData; }
     public void setDiagramData(String diagramData) { this.diagramData = diagramData; }
+
+    public String getShareToken() { return shareToken; }
+    public void setShareToken(String shareToken) { this.shareToken = shareToken; }
+
+    public boolean isPublic() { return isPublic; }
+    public void setPublic(boolean isPublic) { this.isPublic = isPublic; }
 
     public User getOwner() { return owner; }
     public void setOwner(User owner) { this.owner = owner; }

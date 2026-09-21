@@ -11,6 +11,8 @@ public class ProjectResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String diagramData;
+    private String shareToken;
+    private boolean isPublic;
     
     // Getters and Setters
     public Long getId() { return id; }
@@ -36,4 +38,10 @@ public class ProjectResponse {
     
     public String getDiagramData() { return diagramData; }
     public void setDiagramData(String diagramData) { this.diagramData = diagramData; }
+
+    public String getShareToken() { return shareToken; }
+    public void setShareToken(String shareToken) { this.shareToken = shareToken; }
+
+    public boolean isPublic() { return isPublic; }
+    public void setPublic(boolean isPublic) { this.isPublic = isPublic; }
 }

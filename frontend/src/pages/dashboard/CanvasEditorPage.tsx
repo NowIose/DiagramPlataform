@@ -4,6 +4,7 @@ import { ReactFlowProvider, useReactFlow } from '@xyflow/react';
 import EditorLayout from '../../components/editor/EditorLayout';
 import Canvas from '../../components/editor/Canvas';
 import ToastNotification from '../../components/dashboard/ToastNotification';
+import ShareModal from '../../components/editor/ShareModal';
 import axios from 'axios';
 
 function EditorContent() {
@@ -51,9 +52,28 @@ function EditorContent() {
     }
   };
 
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [projectData, setProjectData] = useState<any>(null);
+
+  useEffect(() => {
+    // Optionally fetch basic project data here to know if it's already public
+    const fetchProject = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get(`http://localhost:8080/api/projects/${id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        setProjectData(res.data);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchProject();
+  }, [id]);
+
   return (
     <>
-      <EditorLayout projectId={id || 'desconocido'} onSave={handleSave} isSaving={isSaving}>
+      <EditorLayout projectId={id || 'desconocido'} onSave={handleSave} onShare={() => setIsShareModalOpen(true)} isSaving={isSaving}>
         <Canvas projectId={id} />
       </EditorLayout>
       <ToastNotification 
@@ -63,6 +83,16 @@ function EditorContent() {
         isVisible={toast.isVisible}
         onClose={() => setToast(prev => ({...prev, isVisible: false}))}
       />
+      
+      {isShareModalOpen && (
+        <ShareModal 
+          projectId={id!} 
+          isOpen={isShareModalOpen} 
+          onClose={() => setIsShareModalOpen(false)} 
+          shareToken={projectData?.shareToken}
+          isPublic={projectData?.public}
+        />
+      )}
     </>
   );
 }

@@ -5,10 +5,11 @@ interface EditorLayoutProps {
   projectId: string;
   children: ReactNode;
   onSave: () => void;
+  onShare: () => void;
   isSaving: boolean;
 }
 
-export default function EditorLayout({ projectId, children, onSave, isSaving }: EditorLayoutProps) {
+export default function EditorLayout({ projectId, children, onSave, onShare, isSaving }: EditorLayoutProps) {
   const navigate = useNavigate();
 
   return (
@@ -34,6 +35,14 @@ export default function EditorLayout({ projectId, children, onSave, isSaving }: 
         </div>
         
         <div className="flex items-center gap-2">
+          <button 
+            onClick={onShare}
+            className="px-3 py-1.5 rounded-lg bg-tertiary/10 hover:bg-tertiary/20 text-tertiary text-xs font-label font-semibold flex items-center gap-1 transition-colors"
+          >
+            <span className="material-symbols-outlined text-[14px]">share</span> 
+            Compartir
+          </button>
+          
           <button 
             onClick={onSave}
             disabled={isSaving}

@@ -41,6 +41,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() // Permitir registro e inicio de sesión
+                .requestMatchers("/api/projects/shared/**").permitAll() // Permitir ver proyectos compartidos por enlace
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
             )
