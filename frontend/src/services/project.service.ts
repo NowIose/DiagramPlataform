@@ -1,7 +1,8 @@
 import axios from 'axios';
 import type { Project, CreateProjectRequest, CollaboratorRequest } from '../types/project.types';
 
-const API_URL = 'http://localhost:8080/api/projects';
+const BASE_API = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const API_URL = `${BASE_API}/projects`;
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');

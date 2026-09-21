@@ -42,6 +42,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() // Permitir registro e inicio de sesión
                 .requestMatchers("/api/projects/shared/**").permitAll() // Permitir ver proyectos compartidos por enlace
+                .requestMatchers("/ws-diagram/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
             )

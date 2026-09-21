@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-interface UserSearchResult {
-  id: number;
-  username: string;
-  email: string;
-  avatarUrl?: string;
-  projectStatus?: string;
-}
-
 interface ShareModalProps {
   projectId: string;
   isOpen: boolean;

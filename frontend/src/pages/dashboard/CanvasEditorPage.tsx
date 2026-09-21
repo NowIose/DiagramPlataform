@@ -29,6 +29,11 @@ function EditorContent() {
   }, []);
 
   const handleSave = async () => {
+    if (projectData?.currentUserRole === 'VIEWER') {
+      showToast('Modo Observador', 'No puedes editar o mover objetos, solo eres observador.', 'visibility');
+      return;
+    }
+
     if (!window.confirm("¿Estás seguro de guardar los cambios?")) {
       return;
     }
@@ -37,7 +42,8 @@ function EditorContent() {
     try {
       const flowData = toObject();
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:8080/api/projects/${id}/diagram`, JSON.stringify(flowData), {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      await axios.put(`${API_URL}/projects/${id}/diagram`, JSON.stringify(flowData), {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -60,7 +66,8 @@ function EditorContent() {
     const fetchProject = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`http://localhost:8080/api/projects/${id}`, {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+        const res = await axios.get(`${API_URL}/projects/${id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         setProjectData(res.data);
@@ -73,8 +80,14 @@ function EditorContent() {
 
   return (
     <>
-      <EditorLayout projectId={id || 'desconocido'} onSave={handleSave} onShare={() => setIsShareModalOpen(true)} isSaving={isSaving}>
-        <Canvas projectId={id} />
+      <EditorLayout 
+        projectId={id || 'desconocido'} 
+        onSave={handleSave} 
+        onShare={() => setIsShareModalOpen(true)} 
+        isSaving={isSaving}
+        projectData={projectData}
+      >
+        <Canvas projectId={id} currentUserRole={projectData?.currentUserRole} />
       </EditorLayout>
       <ToastNotification 
         title={toast.title}

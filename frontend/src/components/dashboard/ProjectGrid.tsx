@@ -29,24 +29,35 @@ export default function ProjectGrid({ onToast }: { onToast: (t: string, m: strin
     loadProjects();
   };
 
-  const mappedProjects: (ProjectCardProps & { category: string })[] = projects.map(p => ({
-    id: p.id.toString(),
-    title: p.name,
-    subtitle: p.description || "Sin descripción",
-    icon: "account_tree",
-    tagText: "Nuevo",
-    tagClass: "bg-surface-container text-secondary",
-    entitiesTitle: "Fecha de actualización:",
-    entities: [new Date(p.updatedAt).toLocaleDateString()],
-    metaTags: [
-      { icon: "person", text: p.ownerUsername }
-    ],
-    collaborators: [
-      { init: p.ownerUsername.substring(0, 2).toUpperCase(), color: "bg-primary text-on-primary" }
-    ],
-    category: "uml erd",
-    onToast: onToast
-  }));
+  const mappedProjects: (ProjectCardProps & { category: string })[] = projects.map(p => {
+    // Collect unique collaborators plus owner
+    const allCollabs: any[] = [];
+    allCollabs.push({ init: p.ownerUsername.substring(0, 2).toUpperCase(), color: "bg-primary text-on-primary" });
+    if (p.collaborators) {
+      p.collaborators.forEach(c => {
+        if (c.username !== p.ownerUsername) {
+          allCollabs.push({ init: c.username.substring(0, 2).toUpperCase(), color: "bg-secondary text-on-secondary" });
+        }
+      });
+    }
+
+    return {
+      id: p.id.toString(),
+      title: p.name,
+      subtitle: p.description || "Sin descripción",
+      icon: "account_tree",
+      tagText: p.currentUserRole === 'VIEWER' ? "Solo lectura" : (p.currentUserRole === 'OWNER' ? "Propietario" : "Editor"),
+      tagClass: p.currentUserRole === 'VIEWER' ? "bg-surface-container-high text-secondary" : "bg-primary/10 text-primary",
+      entitiesTitle: "Fecha de actualización:",
+      entities: [new Date(p.updatedAt).toLocaleDateString()],
+      metaTags: [
+        { icon: "person", text: p.ownerUsername }
+      ],
+      collaborators: allCollabs,
+      category: "uml erd",
+      onToast: onToast
+    };
+  });
 
   const filteredProjects = mappedProjects.filter(p => filter === 'all' || p.category.includes(filter));
 

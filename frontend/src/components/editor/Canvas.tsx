@@ -19,6 +19,7 @@ import UmlCommentNode from './nodes/UmlCommentNode';
 import UmlEdge from './edges/UmlEdge';
 import PropertiesPanel from './panels/PropertiesPanel';
 import ToolboxPanel from './panels/ToolboxPanel';
+import { useDiagramSync } from '../../hooks/useDiagramSync';
 
 const nodeTypes = {
   umlClass: UmlClassNode,
@@ -68,20 +69,33 @@ const initialNodes: Node[] = [
 
 const initialEdges: Edge[] = [];
 
-let idCounter = 100;
-const getId = () => `node_${idCounter++}`;
-let edgeCounter = 1;
-const getEdgeId = () => `edge_${edgeCounter++}`;
+const getId = () => `node_${crypto.randomUUID()}`;
+const getEdgeId = () => `edge_${crypto.randomUUID()}`;
 
 interface CanvasProps {
   projectId?: string;
+  currentUserRole?: 'OWNER' | 'EDITOR' | 'VIEWER';
 }
 
-export default function Canvas({ projectId }: CanvasProps) {
+export default function Canvas({ projectId, currentUserRole = 'EDITOR' }: CanvasProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const { screenToFlowPosition, getNode } = useReactFlow();
   
+  const isViewer = currentUserRole === 'VIEWER';
+  
+  // Integración de WebSockets (tiempo real)
+  const { broadcastChange, isRemoteUpdate } = useDiagramSync(projectId, isViewer);
+
+  // Sincronizar cambios detectados
+  useEffect(() => {
+    if (isViewer || isRemoteUpdate.current) return;
+    const timer = setTimeout(() => {
+      broadcastChange();
+    }, 400); // 400ms debounce
+    return () => clearTimeout(timer);
+  }, [nodes, edges, isViewer]);
+
   // Estado para saber qué línea dibujar
   const [selectedEdgeType, setSelectedEdgeType] = useState('umlAssociation');
 
@@ -92,30 +106,20 @@ export default function Canvas({ projectId }: CanvasProps) {
     const fetchProjectData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`http://localhost:8080/api/projects/${projectId}`, {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+        const res = await axios.get(`${API_URL}/projects/${projectId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
         if (res.data.diagramData) {
           const parsedData = JSON.parse(res.data.diagramData);
+          isRemoteUpdate.current = true;
           if (parsedData.nodes) setNodes(parsedData.nodes);
           if (parsedData.edges) setEdges(parsedData.edges);
           
-          // Actualizar idCounter y edgeCounter para que los nuevos IDs no choquen con los existentes
-          if (parsedData.nodes?.length > 0) {
-            const maxNodeId = Math.max(...parsedData.nodes.map((n: any) => {
-              const num = parseInt(n.id.replace('node_', ''));
-              return isNaN(num) ? 0 : num;
-            }));
-            idCounter = maxNodeId + 1;
-          }
-          if (parsedData.edges?.length > 0) {
-            const maxEdgeId = Math.max(...parsedData.edges.map((e: any) => {
-              const num = parseInt(e.id.replace('edge_', ''));
-              return isNaN(num) ? 0 : num;
-            }));
-            edgeCounter = maxEdgeId + 1;
-          }
+          setTimeout(() => {
+            isRemoteUpdate.current = false;
+          }, 300);
         }
       } catch (error) {
         console.error('Error fetching diagram data', error);
@@ -211,21 +215,25 @@ export default function Canvas({ projectId }: CanvasProps) {
 
   return (
     <div className="flex w-full h-full">
-      <ToolboxPanel selectedEdgeType={selectedEdgeType} setSelectedEdgeType={setSelectedEdgeType} />
+      {!isViewer && <ToolboxPanel selectedEdgeType={selectedEdgeType} setSelectedEdgeType={setSelectedEdgeType} />}
       
       <div className="flex-1 relative">
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onDrop={onDrop}
-          onDragOver={onDragOver}
+          onNodesChange={isViewer ? undefined : onNodesChange}
+          onEdgesChange={isViewer ? undefined : onEdgesChange}
+          onConnect={isViewer ? undefined : onConnect}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
+          defaultEdgeOptions={{ type: 'umlEdge' }}
           connectionMode={ConnectionMode.Loose}
+          onDrop={isViewer ? undefined : onDrop}
+          onDragOver={onDragOver}
           fitView
+          nodesDraggable={!isViewer}
+          nodesConnectable={!isViewer}
+          elementsSelectable={!isViewer}
           className="bg-surface-container-lowest"
         >
           {/* SVG Markers personalizados */}

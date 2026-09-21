@@ -53,7 +53,7 @@ public class ProjectService {
         ownerCollaborator.setRole(ProjectRole.OWNER);
         collaboratorRepository.save(ownerCollaborator);
 
-        return mapToResponse(savedProject);
+        return mapToResponse(savedProject, ownerUsername);
     }
 
     public List<ProjectResponse> getUserProjects(String username) {
@@ -72,7 +72,7 @@ public class ProjectService {
         // Unir ambas listas sin duplicados
         return Stream.concat(ownedProjects.stream(), collaboratedProjects.stream())
                 .distinct()
-                .map(this::mapToResponse)
+                .map(project -> mapToResponse(project, username))
                 .collect(Collectors.toList());
     }
 
@@ -139,7 +139,7 @@ public class ProjectService {
             throw new RuntimeException("You do not have access to this project");
         }
 
-        return mapToResponse(project);
+        return mapToResponse(project, username);
     }
 
     public ProjectResponse updateDiagram(Long projectId, String diagramData, String username) {
@@ -159,7 +159,7 @@ public class ProjectService {
 
         project.setDiagramData(diagramData);
         Project savedProject = projectRepository.save(project);
-        return mapToResponse(savedProject);
+        return mapToResponse(savedProject, username);
     }
 
     public void deleteProject(Long projectId, String username) {
@@ -187,7 +187,7 @@ public class ProjectService {
         project.setPublic(isPublic);
         
         Project savedProject = projectRepository.save(project);
-        return mapToResponse(savedProject);
+        return mapToResponse(savedProject, username);
     }
 
     public ProjectResponse getProjectByShareToken(String token) {
@@ -198,10 +198,10 @@ public class ProjectService {
             throw new RuntimeException("This project is no longer public");
         }
 
-        return mapToResponse(project);
+        return mapToResponse(project, null);
     }
 
-    private ProjectResponse mapToResponse(Project project) {
+    private ProjectResponse mapToResponse(Project project, String currentUsername) {
         ProjectResponse response = new ProjectResponse();
         response.setId(project.getId());
         response.setName(project.getName());
@@ -213,6 +213,43 @@ public class ProjectService {
         response.setDiagramData(project.getDiagramData());
         response.setShareToken(project.getShareToken());
         response.setPublic(project.isPublic());
+
+        // Mapear colaboradores
+        List<ProjectCollaborator> collabs = collaboratorRepository.findByProjectId(project.getId());
+        List<com.example.demo.dto.project.CollaboratorResponse> collabResponses = collabs.stream()
+            .map(c -> new com.example.demo.dto.project.CollaboratorResponse(
+                c.getUser().getId(),
+                c.getUser().getUsername(),
+                c.getUser().getAvatarUrl(),
+                c.getRole().name()
+            ))
+            .collect(Collectors.toList());
+        response.setCollaborators(collabResponses);
+
+        // Determinar rol del usuario actual
+        if (currentUsername == null) {
+            response.setCurrentUserRole("VIEWER"); // Default for public links
+        } else if (project.getOwner().getUsername().equals(currentUsername)) {
+            response.setCurrentUserRole("OWNER");
+        } else {
+            collabs.stream()
+                .filter(c -> c.getUser().getUsername().equals(currentUsername))
+                .findFirst()
+                .ifPresentOrElse(
+                    c -> response.setCurrentUserRole(c.getRole().name()),
+                    () -> response.setCurrentUserRole("VIEWER")
+                );
+        }
+
         return response;
+    }
+
+    public Project getProjectEntityById(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+    }
+
+    public void saveProjectEntity(Project project) {
+        projectRepository.save(project);
     }
 }

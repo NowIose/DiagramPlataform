@@ -13,6 +13,8 @@ public class ProjectResponse {
     private String diagramData;
     private String shareToken;
     private boolean isPublic;
+    private String currentUserRole;
+    private java.util.List<CollaboratorResponse> collaborators;
     
     // Getters and Setters
     public Long getId() { return id; }
@@ -44,4 +46,10 @@ public class ProjectResponse {
 
     public boolean isPublic() { return isPublic; }
     public void setPublic(boolean isPublic) { this.isPublic = isPublic; }
+
+    public String getCurrentUserRole() { return currentUserRole; }
+    public void setCurrentUserRole(String currentUserRole) { this.currentUserRole = currentUserRole; }
+
+    public java.util.List<CollaboratorResponse> getCollaborators() { return collaborators; }
+    public void setCollaborators(java.util.List<CollaboratorResponse> collaborators) { this.collaborators = collaborators; }
 }
