@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
+interface UserSearchResult {
+  id: number;
+  username: string;
+  email: string;
+  avatarUrl?: string;
+  projectStatus?: string;
+}
+
 interface ShareModalProps {
   projectId: string;
   isOpen: boolean;
@@ -37,10 +45,10 @@ export default function ShareModal({ projectId, isOpen, onClose, shareToken, isP
       setIsSearching(true);
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`http://localhost:8080/api/users/search?q=${searchQuery}`, {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+        const res = await axios.get(`${API_URL}/users/search?q=${searchQuery}&projectId=${projectId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        // Filtrar al usuario actual si es necesario (el backend también podría hacerlo)
         setSearchResults(res.data);
       } catch (error) {
         console.error("Error buscando usuarios", error);
@@ -50,19 +58,21 @@ export default function ShareModal({ projectId, isOpen, onClose, shareToken, isP
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, projectId]);
 
   const handleInvite = async (username: string) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`http://localhost:8080/api/projects/${projectId}/collaborators`, {
-        email: username, // El backend ahora soporta email o username en este campo
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      await axios.post(`${API_URL}/projects/${projectId}/collaborators`, {
+        email: username, 
         role: selectedRole
       }, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setFeedback({ msg: `Usuario ${username} invitado exitosamente`, type: 'success' });
-      setSearchQuery('');
+      // Update the user's status locally
+      setSearchResults(prev => prev.map(u => u.username === username ? { ...u, projectStatus: 'PENDING' } : u));
     } catch (error: any) {
       let errorMsg = 'Error al invitar usuario';
       if (error.response?.data?.message) {
@@ -77,7 +87,8 @@ export default function ShareModal({ projectId, isOpen, onClose, shareToken, isP
   const handleGenerateLink = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`http://localhost:8080/api/projects/${projectId}/share`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      const res = await axios.post(`${API_URL}/projects/${projectId}/share`, {
         isPublic: !currentIsPublic
       }, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -185,12 +196,22 @@ export default function ShareModal({ projectId, isOpen, onClose, shareToken, isP
                           <span className="text-[10px] text-on-surface-variant">{user.email}</span>
                         </div>
                       </div>
-                      <button 
-                        onClick={() => handleInvite(user.username)}
-                        className="text-xs font-semibold bg-primary text-on-primary px-3 py-1.5 rounded-full hover:bg-primary/90 transition-colors"
-                      >
-                        Invitar
-                      </button>
+                      
+                      {user.projectStatus === 'OWNER' && <span className="text-[10px] font-bold text-tertiary bg-tertiary/10 px-2 py-1 rounded">Propietario</span>}
+                      {user.projectStatus === 'COLLABORATOR' && <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-1 rounded">Colaborador</span>}
+                      {user.projectStatus === 'PENDING' && (
+                        <button onClick={() => handleInvite(user.username)} className="text-[10px] font-bold text-secondary bg-secondary/10 px-2 py-1 rounded hover:bg-secondary/20 transition-colors" title="Re-invitar">
+                          Pendiente (Reenviar)
+                        </button>
+                      )}
+                      {(!user.projectStatus || user.projectStatus === 'NONE') && (
+                        <button 
+                          onClick={() => handleInvite(user.username)}
+                          className="text-xs font-semibold bg-primary text-on-primary px-3 py-1.5 rounded-full hover:bg-primary/90 transition-colors"
+                        >
+                          Invitar
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>

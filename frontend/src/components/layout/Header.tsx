@@ -1,4 +1,5 @@
 import { useAuth } from '../../hooks/useAuth';
+import NotificationDropdown from './NotificationDropdown';
 
 export default function Header() {
   const { logout } = useAuth();
@@ -30,10 +31,7 @@ export default function Header() {
         
         <div className="h-4 w-[1px] bg-surface-container-highest mx-1"></div>
         
-        <button aria-label="Notificaciones" className="w-9 h-9 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors relative" type="button">
-          <span className="material-symbols-outlined text-[20px]">notifications</span>
-          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-tertiary-container"></span>
-        </button>
+        <NotificationDropdown />
         
         <button onClick={logout} title="Cerrar sesión" className="w-8 h-8 rounded-full bg-primary hover:bg-primary-container transition-colors flex items-center justify-center cursor-pointer">
           <span className="material-symbols-outlined text-on-primary text-[18px]">logout</span>

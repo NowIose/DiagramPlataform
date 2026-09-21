@@ -21,15 +21,18 @@ import java.util.stream.Stream;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
-    private final ProjectCollaboratorRepository collaboratorRepository;
     private final UserRepository userRepository;
+    private final ProjectCollaboratorRepository collaboratorRepository;
+    private final com.example.demo.repository.NotificationRepository notificationRepository;
 
     public ProjectService(ProjectRepository projectRepository,
+                          UserRepository userRepository,
                           ProjectCollaboratorRepository collaboratorRepository,
-                          UserRepository userRepository) {
+                          com.example.demo.repository.NotificationRepository notificationRepository) {
         this.projectRepository = projectRepository;
-        this.collaboratorRepository = collaboratorRepository;
         this.userRepository = userRepository;
+        this.collaboratorRepository = collaboratorRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     public ProjectResponse createProject(ProjectRequest request, String ownerUsername) {
@@ -89,11 +92,19 @@ public class ProjectService {
             throw new RuntimeException("User is already a collaborator");
         }
 
-        ProjectCollaborator newCollab = new ProjectCollaborator();
-        newCollab.setProject(project);
-        newCollab.setUser(collaboratorUser);
-        newCollab.setRole(request.getRole() != null ? request.getRole() : ProjectRole.VIEWER);
-        collaboratorRepository.save(newCollab);
+        ProjectRole role = request.getRole() != null ? request.getRole() : ProjectRole.VIEWER;
+
+        // Crear notificación de invitación
+        com.example.demo.model.notification.Notification notification = new com.example.demo.model.notification.Notification();
+        notification.setRecipient(collaboratorUser);
+        notification.setType(com.example.demo.model.notification.NotificationType.PROJECT_INVITE);
+        notification.setTitle("Invitación a proyecto");
+        notification.setMessage("El usuario " + ownerUsername + " te ha invitado a colaborar en el proyecto: " + project.getName());
+        notification.setRelatedEntityId(project.getId());
+        notification.setMetadata(role.name()); // Guardamos el rol (EDITOR o VIEWER) en los metadatos
+        
+        // Guardar la notificación
+        notificationRepository.save(notification);
     }
 
     public void removeCollaborator(Long projectId, Long collaboratorUserId, String ownerUsername) {

@@ -5,12 +5,21 @@ public class UserSearchResponse {
     private String username;
     private String email;
     private String avatarUrl;
+    private String projectStatus;
 
     public UserSearchResponse(Long id, String username, String email, String avatarUrl) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.avatarUrl = avatarUrl;
+    }
+
+    public UserSearchResponse(Long id, String username, String email, String avatarUrl, String projectStatus) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.avatarUrl = avatarUrl;
+        this.projectStatus = projectStatus;
     }
 
     public Long getId() { return id; }
@@ -24,4 +33,7 @@ public class UserSearchResponse {
 
     public String getAvatarUrl() { return avatarUrl; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+
+    public String getProjectStatus() { return projectStatus; }
+    public void setProjectStatus(String projectStatus) { this.projectStatus = projectStatus; }
 }
