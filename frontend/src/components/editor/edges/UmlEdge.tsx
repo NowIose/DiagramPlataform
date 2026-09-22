@@ -54,8 +54,8 @@ export default function UmlEdge({
     edgeMarkerEnd = undefined;
   }
 
-  let strokeWidth = selected ? 2.5 : 1.5;
-  let stroke = selected ? 'var(--color-primary)' : 'var(--color-on-surface)';
+  const strokeWidth = selected ? 2.5 : 1.5;
+  const stroke = selected ? 'var(--color-primary)' : 'var(--color-on-surface)';
 
   // Lookup the associated node dynamically using the store
   const assocNode = useStore((s) => {

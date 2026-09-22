@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useEditorTools } from '../../../hooks/useEditorTools';
 import { ChatService } from '../../../services/chat.service';
 

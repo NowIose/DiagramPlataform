@@ -158,7 +158,7 @@ export default function Canvas({ projectId, currentUserRole = 'EDITOR' }: Canvas
         };
         setEdges((eds) => addEdge(newEdge, eds));
       } else {
-        let newEdge: Edge = {
+        const newEdge: Edge = {
           ...params,
           id: getEdgeId(),
           type: 'umlEdge',

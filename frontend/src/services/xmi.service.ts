@@ -91,7 +91,7 @@ export class XmiService {
       } else {
         let eaType = 'Association';
         let targetAggregation = 'none';
-        let sourceAggregation = 'none';
+        const sourceAggregation = 'none';
 
         if (relType === 'umlAggregation') { eaType = 'Aggregation'; targetAggregation = 'shared'; }
         else if (relType === 'umlComposition') { eaType = 'Aggregation'; targetAggregation = 'composite'; }

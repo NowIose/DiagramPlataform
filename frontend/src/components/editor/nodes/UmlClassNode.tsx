@@ -3,7 +3,7 @@ import { Handle, Position } from '@xyflow/react';
 export default function UmlClassNode({ data, selected, type }: any) {
   // Configuración según el tipo de nodo
   let stereotype = '';
-  let bgColor = 'bg-surface-container-lowest';
+  const bgColor = 'bg-surface-container-lowest';
   let headerColor = 'bg-surface-container-low text-on-surface';
   
   if (selected) {
