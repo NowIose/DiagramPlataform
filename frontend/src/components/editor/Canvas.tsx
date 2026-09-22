@@ -17,7 +17,7 @@ import UmlClassNode from './nodes/UmlClassNode';
 import UmlNoteNode from './nodes/UmlNoteNode';
 import UmlCommentNode from './nodes/UmlCommentNode';
 import UmlEdge from './edges/UmlEdge';
-import PropertiesPanel from './panels/PropertiesPanel';
+import RightSidebar from './panels/RightSidebar';
 import ToolboxPanel from './panels/ToolboxPanel';
 import { useDiagramSync } from '../../hooks/useDiagramSync';
 
@@ -260,7 +260,7 @@ export default function Canvas({ projectId, currentUserRole = 'EDITOR' }: Canvas
         </ReactFlow>
       </div>
       
-      <PropertiesPanel nodes={nodes} setNodes={setNodes} edges={edges} setEdges={setEdges} />
+      <RightSidebar nodes={nodes} setNodes={setNodes} edges={edges} setEdges={setEdges} />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ImageToDiagramButton from './ImageToDiagramButton';
 
 interface EditorLayoutProps {
   projectId: string;
@@ -57,6 +58,8 @@ export default function EditorLayout({ projectId, children, onSave, onShare, isS
               ))}
             </div>
           )}
+
+          {!isViewer && <ImageToDiagramButton />}
 
           {!isViewer && (
             <button 
