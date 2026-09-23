@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
 import { LandingPage } from '../pages/LandingPage';
 import { LoginPage } from '../pages/LoginPage';
@@ -21,9 +21,8 @@ import SharedCanvasPage from '../pages/dashboard/SharedCanvasPage';
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path={ROUTES.HOME} element={<LandingPage />} />
-      
       <Route element={<PublicRoute />}>
+        <Route path={ROUTES.HOME} element={<LandingPage />} />
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
         <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
       </Route>
@@ -46,7 +45,7 @@ export const AppRoutes: React.FC = () => {
       {/* Ruta pública para ver diagramas compartidos */}
       <Route path="/shared/:token" element={<SharedCanvasPage />} />
 
-      <Route path="*" element={<LandingPage />} />
+      <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
     </Routes>
   );
 };

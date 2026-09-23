@@ -5,6 +5,7 @@ import CodeViewerModal from '../../components/modals/CodeViewerModal';
 import type { Project } from '../../types/project.types';
 import { ProjectService } from '../../services/project.service';
 import { SpringBootGenerator } from '../../services/generators/springboot.generator';
+import { FlutterGenerator } from '../../services/generators/flutter.generator';
 
 export default function GeneratorPage() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -21,10 +22,27 @@ export default function GeneratorPage() {
       const fullProject = await ProjectService.getProjectById(selectedProject.id);
       const diagramData = fullProject.diagramData ? JSON.parse(fullProject.diagramData) : { nodes: [], edges: [] };
       
-      const files = SpringBootGenerator.generateFiles(fullProject, diagramData.nodes || [], diagramData.edges || [], config);
+      const rawBackendFiles = SpringBootGenerator.generateFiles(fullProject, diagramData.nodes || [], diagramData.edges || [], config);
+      
+      let allFiles: Record<string, string> = {};
+      
+      // Empaquetar todo el backend en su propia carpeta
+      Object.keys(rawBackendFiles).forEach(key => {
+        allFiles[`backend/${key}`] = rawBackendFiles[key];
+      });
+
+      // Si Flutter estǭ habilitado, empaquetarlo en la carpeta movil/
+      if (config.enableFlutter) {
+        const rawFlutterFiles = FlutterGenerator.generateFiles(fullProject, diagramData.nodes || [], diagramData.edges || [], config);
+        Object.keys(rawFlutterFiles).forEach(key => {
+          // Remover el 'flutter_client/' original y reemplazarlo por 'movil/'
+          const newKey = key.startsWith('flutter_client/') ? key.replace('flutter_client/', 'movil/') : `movil/${key}`;
+          allFiles[newKey] = rawFlutterFiles[key];
+        });
+      }
       
       setProjectConfig(config);
-      setGeneratedFiles(files);
+      setGeneratedFiles(allFiles);
       setSelectedProject(null); // Cerrar config modal
     } catch (error) {
       console.error("Error generating Spring Boot:", error);

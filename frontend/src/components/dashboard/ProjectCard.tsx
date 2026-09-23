@@ -78,7 +78,7 @@ export default function ProjectCard({
           <button 
             className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-xs font-label font-semibold flex items-center gap-1 shadow-xs transition-colors cursor-pointer" 
             type="button"
-            onClick={() => onToast('Generador Spring Boot', 'Sintetizando código Java 21 y Maven pom.xml para ' + title, 'terminal')}
+            onClick={() => navigate('/dashboard/entities', { state: { projectIdToGenerate: id } })}
           >
             <span className="material-symbols-outlined text-[14px]">code</span> Generar
           </button>

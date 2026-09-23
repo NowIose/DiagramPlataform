@@ -370,6 +370,9 @@ export class SpringBootGenerator {
   }
 
   static async generateAndDownload(project: Project, nodes: any[], edges: any[], config: any) {
+    const count = parseInt(localStorage.getItem('generationsCount') || '0', 10);
+    localStorage.setItem('generationsCount', (count + 1).toString());
+    
     const files = this.generateFiles(project, nodes, edges, config);
     const zip = new JSZip();
     Object.entries(files).forEach(([path, content]) => zip.file(path, content));

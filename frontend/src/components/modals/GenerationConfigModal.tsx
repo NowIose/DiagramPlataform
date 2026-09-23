@@ -34,6 +34,7 @@ export default function GenerationConfigModal({ isOpen, onClose, project, mode, 
   const [enableDto, setEnableDto] = useState(true);
   const [enableSwagger, setEnableSwagger] = useState(true);
   const [enableLombok, setEnableLombok] = useState(true);
+  const [enableFlutter, setEnableFlutter] = useState(true); // Estado para Agentic Frontend
 
   // Estados Formulario - SQL
   const [namingConvention, setNamingConvention] = useState('snake_case');
@@ -53,7 +54,8 @@ export default function GenerationConfigModal({ isOpen, onClose, project, mode, 
       groupId, artifactId, javaVersion, apiPrefix, enableCors,
       securityType, userEntityName, generateRoles,
       ddlAuto, dbUrl, dbPort, dbUser, dbPass, enableAuditing,
-      enableCrud, enableDto, enableSwagger, enableLombok
+      enableCrud, enableDto, enableSwagger, enableLombok,
+      enableFlutter
     } : {
       namingConvention, dropTables, auditColumns
     };
@@ -118,6 +120,10 @@ export default function GenerationConfigModal({ isOpen, onClose, project, mode, 
               <button onClick={() => setActiveTab(4)} className={`p-4 text-left border-l-4 transition-colors ${activeTab === 4 ? 'border-primary bg-primary/10 text-primary' : 'border-transparent text-on-surface hover:bg-surface-container-high'}`}>
                 <span className="block font-headline font-semibold text-sm">4. Arquitectura</span>
                 <span className="block text-xs text-on-surface-variant mt-0.5 opacity-80">DTOs, Swagger, CRUD</span>
+              </button>
+              <button onClick={() => setActiveTab(5)} className={`p-4 text-left border-l-4 transition-colors ${activeTab === 5 ? 'border-primary bg-primary/10 text-primary' : 'border-transparent text-on-surface hover:bg-surface-container-high'}`}>
+                <span className="block font-headline font-semibold text-sm">5. App Móvil</span>
+                <span className="block text-xs text-on-surface-variant mt-0.5 opacity-80">Flutter, Agentic AI, Offline</span>
               </button>
             </div>
           )}
@@ -235,6 +241,23 @@ export default function GenerationConfigModal({ isOpen, onClose, project, mode, 
                 {renderToggle('Usar Patrón DTO (Data Transfer Object)', 'Crea clases DTO separadas y utiliza Mappers para evitar exponer las entidades de base de datos directamente a los clientes de la API.', enableDto, setEnableDto)}
                 {renderToggle('Incluir Documentación Swagger (OpenAPI 3)', 'Agrega la dependencia springdoc-openapi-starter-webmvc-ui y configura la ruta /swagger-ui.html para probar los endpoints.', enableSwagger, setEnableSwagger)}
                 {renderToggle('Usar Lombok', 'Genera un código mucho más limpio utilizando anotaciones @Data, @Builder y constructores automáticos en lugar de getters y setters explícitos.', enableLombok, setEnableLombok)}
+              </div>
+            )}
+
+            {/* ------------ SPRING BOOT: TAB 5 (FLUTTER) ------------ */}
+            {mode === 'springboot' && activeTab === 5 && (
+              <div className="space-y-4 animate-fadeIn">
+                <h3 className="text-lg font-headline font-bold border-b border-surface-container-low pb-2 mb-4">Frontend Móvil (Agentic AI)</h3>
+                
+                <div className="bg-primary-container text-on-primary-container p-4 rounded-xl flex items-start gap-3 mb-4">
+                  <span className="material-symbols-outlined mt-0.5">smart_toy</span>
+                  <div>
+                    <h4 className="font-headline font-bold text-sm">Arquitectura Offline-First generada</h4>
+                    <p className="text-xs mt-1">Se construirá un proyecto Flutter básico con SQLite local, un archivo JSON de Tool Calling para la IA, y plantillas UI dinámicas que responden a comandos de voz, sincronizándose automáticamente al backend cuando hay red.</p>
+                  </div>
+                </div>
+
+                {renderToggle('Generar App Móvil (Flutter)', 'Crea la carpeta flutter_client con los modelos Dart, servicios API y la base de datos local preconfigurada para este backend.', enableFlutter, setEnableFlutter)}
               </div>
             )}
 

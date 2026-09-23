@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import GenerationProjectList from '../../components/dashboard/GenerationProjectList';
 import GenerationConfigModal from '../../components/modals/GenerationConfigModal';
 import CodeViewerModal from '../../components/modals/CodeViewerModal';
@@ -9,6 +10,20 @@ import { SqlGenerator } from '../../services/generators/sql.generator';
 export default function EntitiesPage() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [generatedFiles, setGeneratedFiles] = useState<Record<string, string> | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.projectIdToGenerate) {
+      ProjectService.getProjectById(Number(location.state.projectIdToGenerate))
+        .then(project => {
+          setSelectedProject(project);
+          // clear state so it doesn't reopen on refresh
+          navigate(location.pathname, { replace: true, state: {} });
+        })
+        .catch(console.error);
+    }
+  }, [location, navigate]);
 
   const handleConfigure = (project: Project) => {
     setSelectedProject(project);

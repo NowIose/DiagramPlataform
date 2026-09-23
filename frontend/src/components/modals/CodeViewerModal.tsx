@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import type { Project } from '../../types/project.types';
@@ -13,6 +13,15 @@ interface CodeViewerModalProps {
 
 export default function CodeViewerModal({ isOpen, onClose, project, files, projectName }: CodeViewerModalProps) {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      const count = parseInt(localStorage.getItem('generationsCount') || '0', 10);
+      localStorage.setItem('generationsCount', (count + 1).toString());
+      // Trigger a storage event so other components (like MetricsSection) update immediately
+      window.dispatchEvent(new Event('storage'));
+    }
+  }, [isOpen]);
 
   if (!isOpen || !project) return null;
 
@@ -62,8 +71,8 @@ export default function CodeViewerModal({ isOpen, onClose, project, files, proje
               {fileKeys.map(filePath => {
                 const parts = filePath.split('/');
                 const fileName = parts[parts.length - 1];
-                const isJava = fileName.endsWith('.java');
-                const isYml = fileName.endsWith('.yml') || fileName.endsWith('.xml');
+                const isJava = fileName.endsWith('.java') || fileName.endsWith('.dart');
+                const isYml = fileName.endsWith('.yml') || fileName.endsWith('.xml') || fileName.endsWith('.json');
                 const icon = isJava ? 'data_object' : isYml ? 'settings_applications' : 'description';
                 
                 return (
@@ -78,7 +87,10 @@ export default function CodeViewerModal({ isOpen, onClose, project, files, proje
                     title={filePath}
                   >
                     <span className="material-symbols-outlined text-[18px] opacity-70">{icon}</span>
-                    <span className="truncate">{fileName}</span>
+                    <div className="flex flex-col overflow-hidden">
+                      <span className="text-[10px] text-on-surface-variant/70 font-mono truncate">{filePath.replace('/' + fileName, '')}</span>
+                      <span className="truncate">{fileName}</span>
+                    </div>
                   </button>
                 );
               })}
