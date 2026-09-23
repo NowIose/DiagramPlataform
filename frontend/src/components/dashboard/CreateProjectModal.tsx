@@ -5,10 +5,9 @@ interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  onToast: (title: string, message: string, icon: string) => void;
 }
 
-export default function CreateProjectModal({ isOpen, onClose, onSuccess, onToast }: CreateProjectModalProps) {
+export default function CreateProjectModal({ isOpen, onClose, onSuccess }: CreateProjectModalProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,13 +24,13 @@ export default function CreateProjectModal({ isOpen, onClose, onSuccess, onToast
         name: name.trim(),
         description: description.trim()
       });
-      onToast('Éxito', 'Proyecto creado correctamente', 'check_circle');
+      
       setName('');
       setDescription('');
       onSuccess(); // Refreshes grid and closes modal
     } catch (error) {
       console.error(error);
-      onToast('Error', 'No se pudo crear el proyecto', 'error');
+      
     } finally {
       setIsSubmitting(false);
     }

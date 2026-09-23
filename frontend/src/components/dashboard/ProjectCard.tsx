@@ -11,11 +11,10 @@ export interface ProjectCardProps {
   entities: string[];
   metaTags: { icon: string; text: string }[];
   collaborators: { init: string; color: string }[];
-  onToast: (title: string, message: string, icon: string) => void;
 }
 
 export default function ProjectCard({
-  id, title, subtitle, icon, tagText, tagClass, entitiesTitle, entities, metaTags, collaborators, onToast
+  id, title, subtitle, icon, tagText, tagClass, entitiesTitle, entities, metaTags, collaborators
 }: ProjectCardProps) {
   const navigate = useNavigate();
 

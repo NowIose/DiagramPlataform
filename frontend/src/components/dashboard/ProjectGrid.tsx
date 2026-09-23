@@ -4,7 +4,7 @@ import { ProjectService } from '../../services/project.service';
 import type { Project } from '../../types/project.types';
 import CreateProjectModal from './CreateProjectModal';
 
-export default function ProjectGrid({ onToast }: { onToast: (t: string, m: string, i: string) => void }) {
+export default function ProjectGrid() {
   const [filter, setFilter] = useState('all');
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [projects, setProjects] = useState<Project[]>([]);
@@ -20,7 +20,6 @@ export default function ProjectGrid({ onToast }: { onToast: (t: string, m: strin
       setProjects(data);
     } catch (error) {
       console.error("Error loading projects:", error);
-      onToast("Error", "No se pudieron cargar los proyectos", "error");
     }
   };
 
@@ -54,8 +53,7 @@ export default function ProjectGrid({ onToast }: { onToast: (t: string, m: strin
         { icon: "person", text: p.ownerUsername }
       ],
       collaborators: allCollabs,
-      category: "uml erd",
-      onToast: onToast
+      category: "uml erd"
     };
   });
 
@@ -92,7 +90,7 @@ export default function ProjectGrid({ onToast }: { onToast: (t: string, m: strin
 
       <div className={view === 'grid' ? "grid grid-cols-1 md:grid-cols-2 gap-5" : "flex flex-col gap-4"}>
         {filteredProjects.map(project => (
-          <ProjectCard key={project.id} {...project} onToast={onToast} />
+          <ProjectCard key={project.id} {...project}  />
         ))}
         
         <button 
@@ -117,7 +115,7 @@ export default function ProjectGrid({ onToast }: { onToast: (t: string, m: strin
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={handleProjectCreated}
-        onToast={onToast}
+        
       />
     </section>
   );
