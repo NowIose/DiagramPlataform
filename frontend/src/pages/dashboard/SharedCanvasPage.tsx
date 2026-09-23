@@ -40,7 +40,8 @@ function SharedContent() {
   useEffect(() => {
     const fetchSharedProject = async () => {
       try {
-        const res = await axios.get(`http://localhost:8080/api/projects/shared/${token}`);
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+        const res = await axios.get(`${API_URL}/projects/shared/${token}`);
         setProjectName(res.data.name);
         
         if (res.data.diagramData) {

@@ -37,22 +37,68 @@ export default function AIChatPanel() {
       recognitionRef.current.onerror = (event: any) => {
         console.error('Error de reconocimiento de voz:', event.error);
         setIsListening(false);
+        playMicSound(false);
+        if (event.error === 'network') {
+          alert("Error de red: El navegador no pudo conectarse a su servidor de reconocimiento de voz. Verifica tu conexión o intenta reiniciar el navegador.");
+        }
       };
 
       recognitionRef.current.onend = () => {
         setIsListening(false);
+        playMicSound(false);
+        
+        // Auto-envío: dar tiempo a React de actualizar el estado 'input' y simular el clic
+        setTimeout(() => {
+          const sendBtn = document.getElementById('ai-send-btn');
+          if (sendBtn && !sendBtn.hasAttribute('disabled')) {
+            sendBtn.click();
+          }
+        }, 500);
       };
     }
   }, []);
+
+  // Función súper ligera usando la API nativa de Audio del navegador (sin archivos externos)
+  const playMicSound = (isStarting: boolean) => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      
+      osc.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      osc.type = 'sine';
+      
+      if (isStarting) {
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
+      } else {
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.1);
+      }
+      
+      gainNode.gain.setValueAtTime(0.05, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+      
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.1);
+    } catch (e) {
+      console.warn("No se pudo reproducir el sonido del micrófono", e);
+    }
+  };
 
   const toggleListen = () => {
     if (isListening) {
       recognitionRef.current?.stop();
       setIsListening(false);
+      playMicSound(false);
     } else {
       if (recognitionRef.current) {
         recognitionRef.current.start();
         setIsListening(true);
+        playMicSound(true);
       } else {
         alert("Tu navegador no soporta la entrada de voz.");
       }
@@ -192,6 +238,7 @@ export default function AIChatPanel() {
         />
         
         <button 
+          id="ai-send-btn"
           onClick={handleSend}
           disabled={!input.trim() || isLoading}
           className="p-2 rounded-full bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"

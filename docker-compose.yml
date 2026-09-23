@@ -3,6 +3,7 @@ services:
   db:
     image: postgres:15
     container_name: postgres_diagramador
+    restart: always
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: 2077
@@ -15,10 +16,15 @@ services:
   backend:
     build: ./backend
     container_name: springboot_diagramador
+    restart: always
     ports:
       - "8080:8080"
     depends_on:
       - db
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/diagramador_db
+      - DB_USERNAME=admin
+      - DB_PASSWORD=2077
 
 volumes:
   postgres_data:

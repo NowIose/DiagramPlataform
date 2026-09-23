@@ -21,11 +21,11 @@ export default function UmlClassNode({ data, selected, type }: any) {
   return (
     <div className={`relative border-2 rounded-md shadow-sm w-48 font-mono text-xs transition-colors ${bgColor} ${borderStyle} ${selected ? (type==='umlInterface'?'border-tertiary': type==='umlEnum'?'border-secondary':'border-primary') : 'border-surface-container-highest'}`}>
       
-      {/* Handles para conectar flechas */}
-      <Handle type="source" position={Position.Top} id="top" className={`!w-1.5 !h-1.5 border border-surface-container-lowest z-50 ${type==='umlInterface'?'!bg-tertiary': type==='umlEnum'?'!bg-secondary':'!bg-primary'}`} />
-      <Handle type="source" position={Position.Bottom} id="bottom" className={`!w-1.5 !h-1.5 border border-surface-container-lowest z-50 ${type==='umlInterface'?'!bg-tertiary': type==='umlEnum'?'!bg-secondary':'!bg-primary'}`} />
-      <Handle type="source" position={Position.Left} id="left" className={`!w-1.5 !h-1.5 border border-surface-container-lowest z-50 ${type==='umlInterface'?'!bg-tertiary': type==='umlEnum'?'!bg-secondary':'!bg-primary'}`} />
-      <Handle type="source" position={Position.Right} id="right" className={`!w-1.5 !h-1.5 border border-surface-container-lowest z-50 ${type==='umlInterface'?'!bg-tertiary': type==='umlEnum'?'!bg-secondary':'!bg-primary'}`} />
+      {/* Handles restaurados a su aspecto original (visibles para poder hacer conexiones manualmente) */}
+      <Handle type="source" position={Position.Top} id="top" className={`!w-2 !h-2 border border-surface-container-lowest z-50 cursor-crosshair ${type==='umlInterface'?'!bg-tertiary': type==='umlEnum'?'!bg-secondary':'!bg-primary'}`} />
+      <Handle type="source" position={Position.Bottom} id="bottom" className={`!w-2 !h-2 border border-surface-container-lowest z-50 cursor-crosshair ${type==='umlInterface'?'!bg-tertiary': type==='umlEnum'?'!bg-secondary':'!bg-primary'}`} />
+      <Handle type="source" position={Position.Left} id="left" className={`!w-2 !h-2 border border-surface-container-lowest z-50 cursor-crosshair ${type==='umlInterface'?'!bg-tertiary': type==='umlEnum'?'!bg-secondary':'!bg-primary'}`} />
+      <Handle type="source" position={Position.Right} id="right" className={`!w-2 !h-2 border border-surface-container-lowest z-50 cursor-crosshair ${type==='umlInterface'?'!bg-tertiary': type==='umlEnum'?'!bg-secondary':'!bg-primary'}`} />
 
       {/* Header (Nombre de la Clase) */}
       <div className={`p-2 text-center border-b border-surface-container-highest flex flex-col rounded-t-sm ${headerColor}`}>

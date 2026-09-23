@@ -42,7 +42,7 @@ function EditorContent() {
     try {
       const flowData = toObject();
       const token = localStorage.getItem('token');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
       await axios.put(`${API_URL}/projects/${id}/diagram`, JSON.stringify(flowData), {
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -66,7 +66,7 @@ function EditorContent() {
     const fetchProject = async () => {
       try {
         const token = localStorage.getItem('token');
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
         const res = await axios.get(`${API_URL}/projects/${id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });

@@ -11,16 +11,13 @@ export default function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col pt-5 pb-6 shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
-      <div className="px-6 mb-6 flex items-center justify-between">
+      <div className="px-6 mb-6 flex items-center">
         <div className="flex items-center gap-3">
-          <img 
-            alt="DiagramConnect logo" 
-            className="h-8 w-auto object-contain" 
-            src="https://lh3.googleusercontent.com/aida/AEtjO1X36txHdgJmTl5iSf5Y7simJ-EMxpWaDL3QCjBCpCZOAKnUieqbh_1mlzeAd6pY3PpRoyzWlgwYnAwiaB-E5n3fJbHHluD0uRyYg0XZwVGx-myyIC22Y5pgpRc_77MJXqIvBJjsUG3qdXpLRs0HE77UdxuR1FgDy6BAHP5W6gaywUF2H8K8kvWc_hQC6zIjpjSob1t7rIgNBZC71NuR6SAFggWQnLfVl6mXpjWAU7CF3GH-Pnq0Wth9kg" 
-          />
+          <div className="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center shadow-sm shrink-0">
+            <span className="material-symbols-outlined text-[20px]">account_tree</span>
+          </div>
           <span className="font-headline font-semibold text-lg tracking-tight text-on-surface">DiagramConnect</span>
         </div>
-        <span className="text-[10px] font-label uppercase tracking-widest px-1.5 py-0.5 rounded bg-tertiary-container text-on-tertiary-container font-semibold">AI PRO</span>
       </div>
       
       <div className="px-4 mb-5">

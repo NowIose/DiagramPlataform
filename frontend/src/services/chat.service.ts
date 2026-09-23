@@ -94,7 +94,7 @@ ${diagramContext}
 Nota: Para conectar o modificar nodos, debes usar estrictamente los IDs mencionados en el estado actual.`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3.6-flash',
+        model: 'gemini-3.5-flash',
         contents: [
           { role: 'user', parts: [{ text: systemInstruction }] },
           { role: 'model', parts: [{ text: 'Entendido. Estoy listo para usar las herramientas para modificar el diagrama según tus órdenes.' }] },

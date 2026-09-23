@@ -11,7 +11,7 @@ export function useDiagramSync(projectId: string | undefined, isViewer: boolean)
   useEffect(() => {
     if (!projectId) return;
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
     const wsUrl = API_URL.replace('/api', '/ws-diagram');
     
     const client = new Client({

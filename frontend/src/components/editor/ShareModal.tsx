@@ -37,7 +37,7 @@ export default function ShareModal({ projectId, isOpen, onClose, shareToken, isP
       setIsSearching(true);
       try {
         const token = localStorage.getItem('token');
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
         const res = await axios.get(`${API_URL}/users/search?q=${searchQuery}&projectId=${projectId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -55,7 +55,7 @@ export default function ShareModal({ projectId, isOpen, onClose, shareToken, isP
   const handleInvite = async (username: string) => {
     try {
       const token = localStorage.getItem('token');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
       await axios.post(`${API_URL}/projects/${projectId}/collaborators`, {
         email: username, 
         role: selectedRole
@@ -79,7 +79,7 @@ export default function ShareModal({ projectId, isOpen, onClose, shareToken, isP
   const handleGenerateLink = async () => {
     try {
       const token = localStorage.getItem('token');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
       const res = await axios.post(`${API_URL}/projects/${projectId}/share`, {
         isPublic: !currentIsPublic
       }, {

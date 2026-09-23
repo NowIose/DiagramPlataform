@@ -106,7 +106,7 @@ export default function Canvas({ projectId, currentUserRole = 'EDITOR' }: Canvas
     const fetchProjectData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+        const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
         const res = await axios.get(`${API_URL}/projects/${projectId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });

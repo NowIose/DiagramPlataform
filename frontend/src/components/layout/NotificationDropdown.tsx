@@ -23,7 +23,7 @@ export default function NotificationDropdown() {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
       const res = await axios.get(`${API_URL}/notifications`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -55,7 +55,7 @@ export default function NotificationDropdown() {
   const handleAction = async (action: 'accept' | 'reject' | 'read', id: number) => {
     try {
       const token = localStorage.getItem('token');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
       
       if (action === 'accept') {
         await axios.post(`${API_URL}/notifications/${id}/accept-invite`, {}, {

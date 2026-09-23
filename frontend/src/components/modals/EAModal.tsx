@@ -25,7 +25,7 @@ export default function EAModal({ isOpen, onClose }: EAModalProps) {
   const fetchProjects = async () => {
     try {
       const token = localStorage.getItem('token');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
       const res = await axios.get(`${API_URL}/projects`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -47,7 +47,7 @@ export default function EAModal({ isOpen, onClose }: EAModalProps) {
       
       // 2. Crear un nuevo proyecto en el backend con este diagrama
       const token = localStorage.getItem('token');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
       
       const newProjectData = {
         name: file.name.replace('.xml', '').replace('.xmi', '') || 'Diagrama Importado',
@@ -84,7 +84,7 @@ export default function EAModal({ isOpen, onClose }: EAModalProps) {
     try {
       // 1. Obtener diagrama
       const token = localStorage.getItem('token');
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
       const res = await axios.get(`${API_URL}/projects/${projectId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });

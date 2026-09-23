@@ -1,25 +1,33 @@
-import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, Position, useStore } from '@xyflow/react';
+import { BaseEdge, EdgeLabelRenderer, getStraightPath, Position, useStore } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
+import { getEdgeParams } from '../utils/floatingEdgeUtils';
 
 export default function UmlEdge({
   id,
-  sourceX,
-  sourceY,
-  targetX,
-  targetY,
-  sourcePosition,
-  targetPosition,
+  source,
+  target,
   style = {},
   data,
   selected,
 }: EdgeProps) {
-  const [edgePath, labelX, labelY] = getSmoothStepPath({
-    sourceX,
-    sourceY,
-    sourcePosition,
-    targetX,
-    targetY,
-    targetPosition,
+  
+  // Obtenemos los nodos completos para calcular intersecciones flotantes
+  const sourceNode = useStore((s) => s.nodeLookup ? s.nodeLookup.get(source) : s.nodes.find(n => n.id === source));
+  const targetNode = useStore((s) => s.nodeLookup ? s.nodeLookup.get(target) : s.nodes.find(n => n.id === target));
+
+  if (!sourceNode || !targetNode) {
+    return null;
+  }
+
+  // Calculamos los puntos dinámicos (flotantes) de intersección
+  const { sx, sy, tx, ty, sourcePos, targetPos } = getEdgeParams(sourceNode, targetNode);
+
+  // Usamos un camino recto para dar libertad completa de ángulo
+  const [edgePath, labelX, labelY] = getStraightPath({
+    sourceX: sx,
+    sourceY: sy,
+    targetX: tx,
+    targetY: ty,
   });
 
   const relationType = (data?.relationType as string) || 'umlAssociation';
@@ -67,13 +75,13 @@ export default function UmlEdge({
   let ny = 0;
   if (assocNode) {
     const pos = (assocNode as any).internals?.positionAbsolute || assocNode.position || { x: 0, y: 0 };
-    const w = assocNode.measured?.width || 192; // typical class node width
+    const w = assocNode.measured?.width || 192;
     const h = assocNode.measured?.height || 100;
     nx = pos.x + w / 2;
     ny = pos.y + h / 2;
   }
 
-  // Helper para ubicar los labels cerca de las puntas
+  // Helper para ubicar los labels cerca de las puntas dinámicas
   const getOffset = (pos: Position) => {
     const dist = 15;
     if (pos === Position.Top) return { x: 10, y: -dist - 10 };
@@ -83,8 +91,8 @@ export default function UmlEdge({
     return { x: 0, y: 0 };
   };
 
-  const sOffset = getOffset(sourcePosition);
-  const tOffset = getOffset(targetPosition);
+  const sOffset = getOffset(sourcePos);
+  const tOffset = getOffset(targetPos);
 
   return (
     <>
@@ -122,7 +130,7 @@ export default function UmlEdge({
           <div
             style={{
               position: 'absolute',
-              transform: `translate(-50%, -50%) translate(${sourceX + sOffset.x}px, ${sourceY + sOffset.y}px)`,
+              transform: `translate(-50%, -50%) translate(${sx + sOffset.x}px, ${sy + sOffset.y}px)`,
               pointerEvents: 'all',
             }}
             className="bg-surface-container-lowest/80 px-1 rounded text-[10px] font-mono text-primary font-bold shadow-sm"
@@ -135,7 +143,7 @@ export default function UmlEdge({
           <div
             style={{
               position: 'absolute',
-              transform: `translate(-50%, -50%) translate(${targetX + tOffset.x}px, ${targetY + tOffset.y}px)`,
+              transform: `translate(-50%, -50%) translate(${tx + tOffset.x}px, ${ty + tOffset.y}px)`,
               pointerEvents: 'all',
             }}
             className="bg-surface-container-lowest/80 px-1 rounded text-[10px] font-mono text-primary font-bold shadow-sm"

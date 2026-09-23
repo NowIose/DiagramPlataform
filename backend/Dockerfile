@@ -6,7 +6,7 @@ FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
 
 #Copiar el archivo .jar compilado en el contenedor
-COPY target/demo-0.0.1-SNAPSHOT.jar app.jar
+COPY target/*.jar app.jar
 
 #Exponer el puerto en el que corre Srping Boot
 EXPOSE 8080
