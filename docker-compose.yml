@@ -26,5 +26,14 @@ services:
       - DB_USERNAME=admin
       - DB_PASSWORD=2077
 
+  frontend:
+    build: ./frontend
+    container_name: react_diagramador
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
 volumes:
   postgres_data:
