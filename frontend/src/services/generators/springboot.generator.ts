@@ -256,33 +256,7 @@ export class SpringBootGenerator {
   // ==========================================
   // MÓDULO 3: DUMMY JSON BUILDER (Desde IR)
   // ==========================================
-  private static generateDummyJson(parsedClass: ParsedClass, parsedModel: ParsedModel): any {
-      const dummy: any = {};
-      
-      parsedClass.attributes.forEach(attr => {
-          if (attr.isPrimaryKey && parsedClass.parentName) return;
-
-          const isEnum = parsedModel.enums.find(e => e.name === attr.type);
-          if (isEnum && isEnum.values.length > 0) {
-              dummy[attr.name] = isEnum.values[0];
-              return;
-          }
-
-          if (attr.type === 'String') dummy[attr.name] = `TXT-${Math.floor(Math.random() * 1000)}`;
-          else if (attr.type === 'Integer' || attr.type === 'Long') dummy[attr.name] = 1;
-          else if (attr.type === 'Boolean') dummy[attr.name] = true;
-          else if (attr.type === 'Double') dummy[attr.name] = 1.0;
-          else if (attr.type === 'java.time.LocalDateTime') dummy[attr.name] = "2024-01-01T12:00:00";
-      });
-
-      parsedClass.relations.filter(r => r.type === 'ManyToOne').forEach(rel => {
-          dummy[rel.fieldName] = { 
-              [rel.referencedColumn!]: 1
-          };
-      });
-
-      return dummy;
-  }
+  
 
   // ==========================================
   // MÓDULO 4: GENERADORES DINÁMICOS CRUD
@@ -566,3 +540,5 @@ export class SpringBootGenerator {
 </html>`;
     }
 }
+
+
