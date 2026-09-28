@@ -70,29 +70,23 @@ export class SpringBootGenerator {
               isIntermediate: node.type === 'umlIntermediateClass'
           };
 
-          const attrs = node.data.attributes || [];
-          let pkName = attrs.find((a: any) => a.name.toLowerCase() === 'id')?.name;
-          if (!pkName && attrs.length > 0) pkName = attrs[0].name;
-          if (attrs.length === 0) pkName = 'id';
-
-          if (attrs.length === 0) {
-              parsedClass.attributes.push({ name: 'id', type: 'Long', isPrimaryKey: true, isString: false });
-          } else {
-              attrs.forEach((attr: any) => {
-                  let javaType = this.mapJavaType(attr.type);
-                  // Si el tipo coincide con un Enum, usar su nombre
-                  if (parsedEnums.some(e => e.name.toLowerCase() === (attr.type || '').toLowerCase())) {
-                      javaType = this.capitalize(attr.type);
-                  }
-                  
-                  parsedClass.attributes.push({
-                      name: attr.name,
-                      type: javaType,
-                      isPrimaryKey: attr.name === pkName,
-                      isString: javaType === 'String'
-                  });
-              });
+          const rawAttrs = node.data.attributes || [];
+          const attrs = [...rawAttrs];
+          if (!attrs.some((a: any) => a.name.toLowerCase() === 'id')) {
+              attrs.unshift({ name: 'id', type: 'Long', isPrimaryKey: true, isString: false });
           }
+          attrs.forEach((attr: any) => {
+              let javaType = this.mapJavaType(attr.type || 'Long');
+              if (parsedEnums.some(e => e.name.toLowerCase() === (attr.type || '').toLowerCase())) {
+                  javaType = this.capitalize(attr.type);
+              }
+              parsedClass.attributes.push({
+                  name: attr.name,
+                  type: javaType,
+                  isPrimaryKey: attr.name.toLowerCase() === 'id',
+                  isString: javaType === 'String'
+              });
+          });
           parsedClasses[node.id] = parsedClass;
       });
 
@@ -421,25 +415,154 @@ export class SpringBootGenerator {
           links += `<a href="/swagger-ui.html" target="_blank" class="inline-block mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition">Abrir Swagger UI</a>`;
       }
       
-      let apiCards = parsedModel.classes.map(parsedClass => {
-          const endpoint = config.apiPrefix + '/' + parsedClass.name.toLowerCase() + 's';
-          
-          const dummyObj = this.generateDummyJson(parsedClass, parsedModel);
-          const dummyBase64 = typeof window !== 'undefined' ? btoa(unescape(encodeURIComponent(JSON.stringify(dummyObj)))) : Buffer.from(JSON.stringify(dummyObj)).toString('base64');
-          
-          return `
-          <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-              <h3 class="text-lg font-bold text-gray-800 mb-1">${parsedClass.name} API</h3>
-              <p class="text-sm text-gray-500 mb-4 font-mono">${endpoint}</p>
-              <div class="flex flex-col gap-2 mt-4 pt-4 border-t border-gray-100">
-                  <button onclick="testApi('${endpoint}', 'GET', null)" class="w-full px-3 py-2 bg-green-100 text-green-700 font-bold rounded hover:bg-green-200">Test GET</button>
-                  <button onclick="testApi('${endpoint}', 'POST', '${dummyBase64}')" class="w-full px-3 py-2 bg-blue-100 text-blue-700 font-bold rounded hover:bg-blue-200">Test POST (Dummy Data)</button>
-              </div>
-          </div>
-          `;
-      }).join('');
+      const modelJson = JSON.stringify(parsedModel);
+      
+      return `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard | ${config.artifactId}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 font-sans">
+    <div class="max-w-5xl mx-auto py-12 px-4">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-slate-900 mb-3">Backend CRUD Listo!</h1>
+            <p class="text-slate-500 mb-2">Backend Básico Generado por DiagramConnect</p>
+            ${links}
+        </header>
+        <main>
+            <h2 class="text-2xl font-bold mb-6 text-slate-800 text-center">Endpoints Dinámicos</h2>
+            <div id="cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Generado por JS -->
+            </div>
+            <div class="mt-12 bg-slate-900 rounded-xl p-6 shadow-lg text-white">
+                <h3 class="text-lg font-bold mb-2 text-green-400">Consola</h3>
+                <pre id="console-output" class="font-mono text-sm h-48 overflow-y-auto whitespace-pre-wrap text-gray-300">Esperando ejecución...</pre>
+            </div>
+        </main>
+    </div>
+    <script>
+        const model = ${modelJson};
+        const apiPrefix = "${config.apiPrefix}";
+        
+        async function fetchOptions(targetClass) {
+            try {
+                const res = await fetch(apiPrefix + '/' + targetClass.toLowerCase() + 's');
+                if (res.ok) return await res.json();
+            } catch (e) {}
+            return [];
+        }
 
-      return `<!DOCTYPE html>\n<html lang="es">\n<head>\n    <meta charset="UTF-8">\n    <title>Dashboard | ${config.artifactId}</title>\n    <script src="https://cdn.tailwindcss.com"></script>\n</head>\n<body class="bg-slate-50 min-h-screen text-slate-800 font-sans">\n    <div class="max-w-5xl mx-auto py-12 px-4">\n        <header class="text-center mb-10">\n            <h1 class="text-4xl font-extrabold text-slate-900 mb-3">Backend CRUD Listo 🚀</h1>\n            <p class="text-slate-500 mb-2">Backend Básico Generado por DiagramConnect</p>\n            ${links}\n        </header>\n        <main>\n            <h2 class="text-2xl font-bold mb-6 text-slate-800 text-center">Endpoints Dinámicos</h2>\n            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">\n                ${apiCards}\n            </div>\n            <div class="mt-12 bg-slate-900 rounded-xl p-6 shadow-lg text-white">\n                <h3 class="text-lg font-bold mb-2 text-green-400">Consola</h3>\n                <pre id="console-output" class="font-mono text-sm h-48 overflow-y-auto whitespace-pre-wrap text-gray-300">Esperando ejecución...</pre>\n            </div>\n        </main>\n    </div>\n    <script>\n        async function testApi(endpoint, method, payloadBase64) {\n            const out = document.getElementById('console-output');\n            out.innerHTML = 'Ejecutando ' + method + ' ' + endpoint + '...\\n';\n            const opts = { method, headers: {'Content-Type': 'application/json'} };\n            \n            if (method === 'POST' && payloadBase64) {\n                opts.body = decodeURIComponent(escape(atob(payloadBase64)));\n                out.innerHTML += 'Payload: ' + opts.body + '\\n';\n            }\n            \n            try {\n                const res = await fetch(endpoint, opts);\n                if (!res.ok) throw new Error('Status: ' + res.status + ' (Error de validación o base de datos)');\n                const text = await res.text();\n                try { out.innerHTML += '\\nÉxito:\\n' + JSON.stringify(JSON.parse(text), null, 2); }\n                catch { out.innerHTML += '\\nÉxito:\\n' + text; }\n            } catch (e) {\n                out.innerHTML += '\\nError:\\n' + e.message;\n            }\n        }\n    </script>\n</body>\n</html>`;
-  }
+        async function renderCards() {
+            const container = document.getElementById('cards-container');
+            container.innerHTML = '';
+            
+            for (const cls of model.classes) {
+                const endpoint = apiPrefix + '/' + cls.name.toLowerCase() + 's';
+                
+                let formHtml = '<div class="space-y-2 mt-4">';
+                
+                for (const attr of cls.attributes) {
+                    if (attr.isPrimaryKey) continue;
+                    formHtml += \`<div><label class="block text-xs font-bold text-gray-700">\${attr.name}</label><input type="text" id="input-\${cls.name}-\${attr.name}" class="w-full p-1 border rounded text-sm"></div>\`;
+                }
+                
+                for (const rel of cls.relations) {
+                    if (rel.type === 'ManyToOne' || rel.type === 'OneToOne') {
+                        formHtml += \`<div><label class="block text-xs font-bold text-gray-700">\${rel.fieldName} (Seleccionar)</label><select id="select-\${cls.name}-\${rel.fieldName}" class="w-full p-1 border rounded text-sm"><option value="">Cargando...</option></select></div>\`;
+                    }
+                }
+                
+                formHtml += '</div>';
+
+                const card = document.createElement('div');
+                card.className = 'bg-white p-5 rounded-xl border border-gray-200 shadow-sm';
+                card.innerHTML = \`
+                    <h3 class="text-lg font-bold text-gray-800 mb-1">\${cls.name} API</h3>
+                    <p class="text-sm text-gray-500 mb-4 font-mono">\${endpoint}</p>
+                    <button onclick="testApi('\${endpoint}', 'GET')" class="w-full px-3 py-2 bg-green-100 text-green-700 font-bold rounded hover:bg-green-200 mb-2">Test GET</button>
+                    <details class="bg-gray-50 p-3 rounded border">
+                        <summary class="font-bold text-sm cursor-pointer text-blue-600">Formulario POST</summary>
+                        \${formHtml}
+                        <button onclick="submitForm('\${cls.name}', '\${endpoint}')" class="w-full mt-3 px-3 py-2 bg-blue-600 text-white font-bold rounded hover:bg-blue-700">Enviar POST</button>
+                    </details>
+                \`;
+                container.appendChild(card);
+
+                for (const rel of cls.relations) {
+                    if (rel.type === 'ManyToOne' || rel.type === 'OneToOne') {
+                        const select = document.getElementById(\`select-\${cls.name}-\${rel.fieldName}\`);
+                        const options = await fetchOptions(rel.targetClass);
+                        select.innerHTML = '<option value="">-- NINGUNO --</option>';
+                        options.forEach(opt => {
+                            const idKey = Object.keys(opt).find(k => k.toLowerCase().includes('id') || k.toLowerCase().includes('nro')) || Object.keys(opt)[0];
+                            const idVal = opt[idKey];
+                            let desc = Object.keys(opt).find(k => k.toLowerCase().includes('nombre') || k.toLowerCase().includes('desc')) || '';
+                            const descVal = desc ? opt[desc] : '';
+                            select.innerHTML += \`<option value="\${idVal}">ID: \${idVal} \${descVal}</option>\`;
+                        });
+                    }
+                }
+            }
+        }
+
+        async function submitForm(className, endpoint) {
+            const cls = model.classes.find(c => c.name === className);
+            const payload = {};
+            
+            cls.attributes.forEach(attr => {
+                if (attr.isPrimaryKey) return;
+                const val = document.getElementById(\`input-\${cls.name}-\${attr.name}\`).value;
+                if (attr.type === 'Integer' || attr.type === 'Long' || attr.type === 'Double') {
+                    payload[attr.name] = Number(val);
+                } else if (attr.type === 'Boolean') {
+                    payload[attr.name] = val === 'true';
+                } else {
+                    payload[attr.name] = val;
+                }
+            });
+            
+            cls.relations.forEach(rel => {
+                if (rel.type === 'ManyToOne' || rel.type === 'OneToOne') {
+                    const val = document.getElementById(\`select-\${cls.name}-\${rel.fieldName}\`).value;
+                    if (val) {
+                        payload[rel.fieldName] = { id: Number(val) };
+                    }
+                }
+            });
+
+            await testApi(endpoint, 'POST', payload);
+        }
+
+        async function testApi(endpoint, method, payloadObj) {
+            const out = document.getElementById('console-output');
+            out.innerHTML = 'Ejecutando ' + method + ' ' + endpoint + '...\\n';
+            const opts = { method, headers: {'Content-Type': 'application/json'} };
+            
+            if (payloadObj) {
+                opts.body = JSON.stringify(payloadObj);
+                out.innerHTML += 'Payload: ' + opts.body + '\\n';
+            }
+            
+            try {
+                const res = await fetch(endpoint, opts);
+                const text = await res.text();
+                if (!res.ok) throw new Error('Status: ' + res.status + '\\n' + text);
+                try { out.innerHTML += '\\nExito:\\n' + JSON.stringify(JSON.parse(text), null, 2); }
+                catch { out.innerHTML += '\\nExito:\\n' + text; }
+                
+                if (method === 'POST') {
+                    renderCards(); 
+                }
+            } catch (e) {
+                out.innerHTML += '\\nError:\\n' + e.message;
+            }
+        }
+
+        renderCards();
+    </script>
+</body>
+</html>`;
+    }
 }
-
