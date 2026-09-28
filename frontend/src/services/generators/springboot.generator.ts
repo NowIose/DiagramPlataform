@@ -59,7 +59,8 @@ export class SpringBootGenerator {
 
       // 1. Inicializar Clases y Atributos
       nodes.filter(n => n.type === 'umlClass' || n.type === 'umlIntermediateClass').forEach(node => {
-          const className = this.capitalize(node.data.label || 'Entity');
+          const rawLabel = node.data.label || 'Entity';
+          const className = this.capitalize(rawLabel.replace(/[^a-zA-Z0-9_]/g, ''));
           const parsedClass: ParsedClass = {
               id: node.id,
               name: className,
@@ -322,7 +323,7 @@ export class SpringBootGenerator {
   // ==========================================
   static generateFiles(_project: Project, nodes: any[], edges: any[], config: any): Record<string, string> {
     const files: Record<string, string> = {};
-    const basePackage = config.groupId + '.' + config.artifactId.replace(/[^a-zA-Z0-9]/g, '');
+    const basePackage = config.groupId.replace(/[^a-zA-Z0-9\.]/g, '') + '.' + config.artifactId.replace(/[^a-zA-Z0-9_]/g, '');
     const packagePath = basePackage.replace(/\./g, '/');
     const mainClassName = this.capitalize(config.artifactId.replace(/[^a-zA-Z0-9]/g, '')) + 'Application';
 
@@ -441,3 +442,4 @@ export class SpringBootGenerator {
       return `<!DOCTYPE html>\n<html lang="es">\n<head>\n    <meta charset="UTF-8">\n    <title>Dashboard | ${config.artifactId}</title>\n    <script src="https://cdn.tailwindcss.com"></script>\n</head>\n<body class="bg-slate-50 min-h-screen text-slate-800 font-sans">\n    <div class="max-w-5xl mx-auto py-12 px-4">\n        <header class="text-center mb-10">\n            <h1 class="text-4xl font-extrabold text-slate-900 mb-3">Backend CRUD Listo 🚀</h1>\n            <p class="text-slate-500 mb-2">Backend Básico Generado por DiagramConnect</p>\n            ${links}\n        </header>\n        <main>\n            <h2 class="text-2xl font-bold mb-6 text-slate-800 text-center">Endpoints Dinámicos</h2>\n            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">\n                ${apiCards}\n            </div>\n            <div class="mt-12 bg-slate-900 rounded-xl p-6 shadow-lg text-white">\n                <h3 class="text-lg font-bold mb-2 text-green-400">Consola</h3>\n                <pre id="console-output" class="font-mono text-sm h-48 overflow-y-auto whitespace-pre-wrap text-gray-300">Esperando ejecución...</pre>\n            </div>\n        </main>\n    </div>\n    <script>\n        async function testApi(endpoint, method, payloadBase64) {\n            const out = document.getElementById('console-output');\n            out.innerHTML = 'Ejecutando ' + method + ' ' + endpoint + '...\\n';\n            const opts = { method, headers: {'Content-Type': 'application/json'} };\n            \n            if (method === 'POST' && payloadBase64) {\n                opts.body = decodeURIComponent(escape(atob(payloadBase64)));\n                out.innerHTML += 'Payload: ' + opts.body + '\\n';\n            }\n            \n            try {\n                const res = await fetch(endpoint, opts);\n                if (!res.ok) throw new Error('Status: ' + res.status + ' (Error de validación o base de datos)');\n                const text = await res.text();\n                try { out.innerHTML += '\\nÉxito:\\n' + JSON.stringify(JSON.parse(text), null, 2); }\n                catch { out.innerHTML += '\\nÉxito:\\n' + text; }\n            } catch (e) {\n                out.innerHTML += '\\nError:\\n' + e.message;\n            }\n        }\n    </script>\n</body>\n</html>`;
   }
 }
+
