@@ -7,11 +7,12 @@ interface EditorLayoutProps {
   children: ReactNode;
   onSave: () => void;
   onShare: () => void;
+  onEASync?: () => void;
   isSaving: boolean;
   projectData?: any;
 }
 
-export default function EditorLayout({ projectId, children, onSave, onShare, isSaving, projectData }: EditorLayoutProps) {
+export default function EditorLayout({ projectId, children, onSave, onShare, onEASync, isSaving, projectData }: EditorLayoutProps) {
   const navigate = useNavigate();
 
   const isViewer = projectData?.currentUserRole === 'VIEWER';
@@ -59,7 +60,15 @@ export default function EditorLayout({ projectId, children, onSave, onShare, isS
             </div>
           )}
 
-          {!isViewer && <ImageToDiagramButton />}
+          {!isViewer && <ImageToDiagramButton />}          {!isViewer && onEASync && (
+            <button 
+              onClick={onEASync}
+              className="px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant text-xs font-label font-semibold flex items-center gap-1 transition-colors"
+            >
+              <span className="material-symbols-outlined text-[16px]">sync_alt</span>
+              EA Sync
+            </button>
+          )}
 
           {!isViewer && (
             <button 
@@ -100,3 +109,4 @@ export default function EditorLayout({ projectId, children, onSave, onShare, isS
     </div>
   );
 }
+

@@ -6,11 +6,13 @@ import Canvas from '../../components/editor/Canvas';
 import ToastNotification from '../../components/dashboard/ToastNotification';
 import ShareModal from '../../components/editor/ShareModal';
 import axios from 'axios';
+import EASyncEditorModal from '../../components/modals/EASyncEditorModal';
 
 function EditorContent() {
   const { id } = useParams();
   const [isSaving, setIsSaving] = useState(false);
-  const { toObject } = useReactFlow();
+  const { toObject, setNodes, setEdges } = useReactFlow();
+  const [isEASyncOpen, setIsEASyncOpen] = useState(false);
   
   const [toast, setToast] = useState({ isVisible: false, title: '', message: '', icon: 'info' });
 
@@ -83,7 +85,8 @@ function EditorContent() {
       <EditorLayout 
         projectId={id || 'desconocido'} 
         onSave={handleSave} 
-        onShare={() => setIsShareModalOpen(true)} 
+        onShare={() => setIsShareModalOpen(true)}
+          onEASync={() => setIsEASyncOpen(true)} 
         isSaving={isSaving}
         projectData={projectData}
       >
@@ -97,11 +100,28 @@ function EditorContent() {
         onClose={() => setToast(prev => ({...prev, isVisible: false}))}
       />
       
+      
+
+      {isEASyncOpen && (
+        <EASyncEditorModal
+          isOpen={isEASyncOpen}
+          onClose={() => setIsEASyncOpen(false)}
+          localNodes={toObject().nodes}
+          localEdges={toObject().edges}
+          projectName={projectData?.name || 'diagrama'}
+          onApplyChanges={(newNodes, newEdges) => {
+            setNodes(newNodes);
+            setEdges(newEdges);
+            showToast('Sincronizado', 'Se integraron los cambios de EA exitosamente', 'check_circle');
+          }}
+        />
+      )}
+
       {isShareModalOpen && (
-        <ShareModal 
-          projectId={id!} 
-          isOpen={isShareModalOpen} 
-          onClose={() => setIsShareModalOpen(false)} 
+        <ShareModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          projectId={id || ''}
           shareToken={projectData?.shareToken}
           isPublic={projectData?.public}
         />
@@ -117,3 +137,5 @@ export default function CanvasEditorPage() {
     </ReactFlowProvider>
   );
 }
+
+
