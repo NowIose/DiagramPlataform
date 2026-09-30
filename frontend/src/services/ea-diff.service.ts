@@ -102,28 +102,39 @@ export class EADiffService {
   /**
    * Integra los cambios aprobados en los arreglos actuales.
    */
-  static applyChanges(localNodes: any[], localEdges: any[], remoteEdges: any[], changes: EADiffChange[]): { newNodes: any[], newEdges: any[] } {
+  static applyChanges(localNodes: any[], localEdges: any[], remoteNodes: any[], remoteEdges: any[], changes: EADiffChange[]): { newNodes: any[], newEdges: any[] } {
     let resultNodes = [...localNodes];
     let resultEdges = [...localEdges];
 
     // Mapa de IDs remotos a IDs locales para reconectar los edges
     const remoteIdToLocalId = new Map<string, string>();
 
-    // Primero mapear las clases que NO se van a sobreescribir (las que ya existían y no tuvieron cambios, o tuvieron pero fueron rechazados)
-    // Para que los edges importados puedan conectarse a ellas.
-    // Ojo: Esto es un poco complejo, así que simplificaremos:
-    // Solo reconectamos edges nuevos si involucran nodos que se mantienen o actualizan.
+    // 1. Mapear TODOS los nodos remotos a los locales correspondientes por nombre (incluso los no modificados)
+    const localMap = new Map<string, any>();
+    localNodes.forEach(n => {
+      const name = n.data?.label?.trim().toLowerCase();
+      if (name) localMap.set(name, n);
+    });
 
-    // Aplicar nodos
+    remoteNodes.forEach(rNode => {
+      const name = rNode.data?.label?.trim().toLowerCase();
+      if (name && localMap.has(name)) {
+        // La clase existe localmente, asocia el ID de EA al ID local actual
+        remoteIdToLocalId.set(rNode.id, localMap.get(name).id);
+      } else {
+        // La clase es nueva (ADD)
+        remoteIdToLocalId.set(rNode.id, rNode.id);
+      }
+    });
+
+    // 2. Aplicar los cambios en nodos (ADD, MODIFY, DELETE)
     changes.filter(c => c.selected).forEach(change => {
       if (change.type === 'ADD') {
         resultNodes.push(change.remoteNode);
-        remoteIdToLocalId.set(change.remoteNode.id, change.remoteNode.id);
       } 
       else if (change.type === 'MODIFY') {
         const index = resultNodes.findIndex(n => n.id === change.localNode.id);
         if (index !== -1) {
-          // Fusionar atributos y métodos de la versión remota, manteniendo la posición visual del local
           const mergedNode = {
             ...change.localNode,
             data: {
@@ -133,7 +144,6 @@ export class EADiffService {
             }
           };
           resultNodes[index] = mergedNode;
-          remoteIdToLocalId.set(change.remoteNode.id, change.localNode.id);
         }
       }
       else if (change.type === 'DELETE') {
@@ -170,4 +180,5 @@ export class EADiffService {
     return { newNodes: resultNodes, newEdges: resultEdges };
   }
 }
+
 

@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { XmiService } from '../../services/xmi.service';
 import { EADiffService } from '../../services/ea-diff.service';
-import type { EADiffChange }  from '../../services/ea-diff.service';
+import type { EADiffChange } from '../../services/ea-diff.service';
 
 interface EASyncEditorModalProps {
   isOpen: boolean;
@@ -18,6 +18,7 @@ export default function EASyncEditorModal({ isOpen, onClose, localNodes, localEd
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [changes, setChanges] = useState<EADiffChange[]>([]);
+  const [remoteNodesState, setRemoteNodesState] = useState<any[]>([]);
   const [remoteEdgesState, setRemoteEdgesState] = useState<any[]>([]);
   const [showDiff, setShowDiff] = useState(false);
 
@@ -34,6 +35,7 @@ export default function EASyncEditorModal({ isOpen, onClose, localNodes, localEd
       
       const diffs = EADiffService.compareDiagrams(localNodes, localEdges, diagramData.nodes, diagramData.edges);
       
+      setRemoteNodesState(diagramData.nodes);
       setRemoteEdgesState(diagramData.edges);
       setChanges(diffs);
       setShowDiff(true);
@@ -72,7 +74,7 @@ export default function EASyncEditorModal({ isOpen, onClose, localNodes, localEd
   };
 
   const applyMerge = () => {
-    const { newNodes, newEdges } = EADiffService.applyChanges(localNodes, localEdges, remoteEdgesState, changes);
+    const { newNodes, newEdges } = EADiffService.applyChanges(localNodes, localEdges, remoteNodesState, remoteEdgesState, changes);
     onApplyChanges(newNodes, newEdges);
     setShowDiff(false);
     onClose();
@@ -81,6 +83,7 @@ export default function EASyncEditorModal({ isOpen, onClose, localNodes, localEd
   const cancelMerge = () => {
     setShowDiff(false);
     setChanges([]);
+    setRemoteNodesState([]);
     setRemoteEdgesState([]);
   };
 
@@ -191,4 +194,3 @@ export default function EASyncEditorModal({ isOpen, onClose, localNodes, localEd
     </div>
   );
 }
-
