@@ -210,7 +210,14 @@ export class XmiService {
            const attrName = attrs[a].getAttribute('name');
            const visAttr = attrs[a].getAttribute('visibility');
            const visibility = visAttr === 'public' ? '+' : visAttr === 'protected' ? '#' : '-';
-           if (attrName) attributes.push({ name: attrName, visibility, type: 'String' });
+           let attrType = attrs[a].getAttribute('type') || 'String';
+           const tagVals = attrs[a].getElementsByTagName('UML:TaggedValue');
+           for(let t=0; t<tagVals.length; t++) {
+               if(tagVals[t].getAttribute('tag') === 'type') {
+                   attrType = tagVals[t].getAttribute('value') || attrType;
+               }
+           }
+           if (attrName) attributes.push({ name: attrName, visibility, type: attrType });
         }
 
         const ops = el.getElementsByTagName('UML:Operation');
@@ -302,3 +309,4 @@ export class XmiService {
     return { nodes, edges };
   }
 }
+
