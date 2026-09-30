@@ -57,7 +57,8 @@ export class XmiService {
          xml += `            <UML:Classifier.feature>\n`;
          (node.data.attributes || []).forEach((attr: any, idx: number) => {
              const vis = attr.visibility === '+' ? 'public' : attr.visibility === '-' ? 'private' : 'protected';
-             xml += `              <UML:Attribute name="${attr.name}" xmi.id="${eaId}_attr${idx}" visibility="${vis}" type="${attr.type || 'String'}">\n`;
+             xml += `              <UML:Attribute name="${attr.name}" xmi.id="${eaId}_attr${idx}" visibility="${vis}">\n`;
+             xml += `                <UML:ModelElement.taggedValue>\n                  <UML:TaggedValue tag="type" value="${attr.type || 'String'}"/>\n                </UML:ModelElement.taggedValue>\n`;
              if (node.type === 'umlEnum') {
                xml += `                <UML:ModelElement.stereotype>\n                  <UML:Stereotype name="enum"/>\n                </UML:ModelElement.stereotype>\n`;
              }
@@ -309,4 +310,5 @@ export class XmiService {
     return { nodes, edges };
   }
 }
+
 
